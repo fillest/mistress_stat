@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+set -e
+
+watchmedo auto-restart -p '*.py' python -- stat_server.py "$@"
