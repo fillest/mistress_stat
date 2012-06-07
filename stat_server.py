@@ -146,7 +146,7 @@ def test_add_stats (request):
 	return no_response
 
 def process_steps (test_id):
-	print "tick", test_id
+	#print "tick", test_id
 
 	#what if interrupted by kill? (or dont do it?)
 	#TODO dont forget actual finish time
@@ -160,22 +160,22 @@ def process_steps (test_id):
 	#tx = new_tx - test['tx_snapshot']
 	#test['tx_snapshot'] = new_tx
 
-	buf_statuses = defaultdict(int)
-	buf_resp_time = defaultdict(list)
-	buf_conn_time = defaultdict(list)
-	buf_errors = defaultdict(int)
-	buf_concur_users_num_max = 0
-	buf_concur_users_num_min = 0
-	buf_concur_conns_num_min = 0
-	buf_concur_conns_num_max = 0
-	buf_start_session = 0
-	buf_request_sent = 0
-
-	did_got_steps = False
 	while True:
 		steps = step_ques[test_id].next()
 		if steps:
-			did_got_steps = True
+			buf_statuses = defaultdict(int)
+			buf_resp_time = defaultdict(list)
+			buf_conn_time = defaultdict(list)
+			buf_errors = defaultdict(int)
+			buf_concur_users_num_max = 0
+			buf_concur_users_num_min = 0
+			buf_concur_conns_num_min = 0
+			buf_concur_conns_num_max = 0
+			buf_start_session = 0
+			buf_request_sent = 0
+
+			is_finish_only_step = all(len(data) == 1 and data[0]['type'] == stypes.FINISH_TEST for node_id, data in steps.items())
+
 			for node_id, data in steps.items():
 				for rec in data:
 					data_type = rec['type']
@@ -229,45 +229,44 @@ def process_steps (test_id):
 						finish_que[test_id][node_id] = True
 					else:
 						raise NotImplementedError(rec['type'])
+
+			if not is_finish_only_step:
+				res = test['result']
+
+				rt = {}
+				rm = {}
+				for grp, times in buf_resp_time.iteritems():
+					resp_time_med = util.get_median(times)
+					rt[grp] = resp_time_med
+					rm[grp] = util.get_median(abs(t - resp_time_med) for t in times)
+				res['resp_time'].append(rt)
+				res['resp_time_meav'].append(rm)  #TODO rename to med_abs_dev
+
+				rt = {}
+				rm = {}
+				for grp, times in buf_conn_time.iteritems():
+					resp_time_med = util.get_median(times)
+					rt[grp] = resp_time_med
+					rm[grp] = util.get_median(abs(t - resp_time_med) for t in times)
+				res['conn_time'].append(rt)
+				res['conn_time_meav'].append(rm)  #TODO rename to med_abs_dev
+
+				res['start_session'].append(buf_start_session)
+				res['resp_status'].append(buf_statuses)
+				res['req_sent'].append(buf_request_sent)
+				res['errors'].append(buf_errors)
+				res['concur_users_num_max'].append(buf_concur_users_num_max)
+				res['concur_users_num_min'].append(buf_concur_users_num_min)
+				res['concur_conns_num_min'].append(buf_concur_conns_num_min)
+				res['concur_conns_num_max'].append(buf_concur_conns_num_max)
+
+				#res['network_received'].append(float(rx) / 1024.0)
+				#res['network_sent'].append(float(tx) / 1024.0)
 		else:
 			break
 
-	if did_got_steps:
-		res = test['result']
-
-		rt = {}
-		rm = {}
-		for grp, times in buf_resp_time.iteritems():
-			resp_time_med = util.get_median(times)
-			rt[grp] = resp_time_med
-			rm[grp] = util.get_median(abs(t - resp_time_med) for t in times)
-		res['resp_time'].append(rt)
-		res['resp_time_meav'].append(rm)  #TODO rename to med_abs_dev
-
-		rt = {}
-		rm = {}
-		for grp, times in buf_conn_time.iteritems():
-			resp_time_med = util.get_median(times)
-			rt[grp] = resp_time_med
-			rm[grp] = util.get_median(abs(t - resp_time_med) for t in times)
-		res['conn_time'].append(rt)
-		res['conn_time_meav'].append(rm)  #TODO rename to med_abs_dev
-
-		res['start_session'].append(buf_start_session)
-		res['resp_status'].append(buf_statuses)
-		res['req_sent'].append(buf_request_sent)
-		res['errors'].append(buf_errors)
-		res['concur_users_num_max'].append(buf_concur_users_num_max)
-		res['concur_users_num_min'].append(buf_concur_users_num_min)
-		res['concur_conns_num_min'].append(buf_concur_conns_num_min)
-		res['concur_conns_num_max'].append(buf_concur_conns_num_max)
-
-		#res['network_received'].append(float(rx) / 1024.0)
-		#res['network_sent'].append(float(tx) / 1024.0)
-
-
 	if len(finish_que[test_id]) == test['worker_num']:
-		print "finished"
+		#print "finished"
 
 		tests_cache[test_id]['finished'] = time.time()
 		with conn:
