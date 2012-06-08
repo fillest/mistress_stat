@@ -31,6 +31,9 @@ from pyramid.httpexceptions import HTTPNotFound, HTTPFound
 import util
 
 
+WORKERS_TIMEOUT = 10  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
+
+
 class StepsQueue (object):
 	def __init__ (self, nodes_num):
 		self._buf = defaultdict(dict)
@@ -72,6 +75,7 @@ tests_cache = {}
 timers = {}
 step_ques = {}
 finish_que = defaultdict(dict)
+workers_last_activity = {}
 
 
 def dbdump (o):
@@ -122,9 +126,10 @@ def test_register (request):
 
 	step_ques[id] = StepsQueue(test['worker_num'])
 
+	workers_last_activity[id] = dict((i, time.time()) for i in range(1, test['worker_num'] + 1)) #TODO send actual ids
+
 	timers[id] = util.start_periodic(1, process_steps, [id])
 	timers[id].link_exception()
-
 
 	return id
 
@@ -147,8 +152,7 @@ def test_add_stats (request):
 
 def process_steps (test_id):
 	#print "tick", test_id
-
-	#what if interrupted by kill? (or dont do it?)
+	#TODO what if this gets interrupted by kill during io?
 	#TODO dont forget actual finish time
 
 	test = tests_cache[test_id]
@@ -177,6 +181,8 @@ def process_steps (test_id):
 			is_finish_only_step = all(len(data) == 1 and data[0]['type'] == stypes.FINISH_TEST for node_id, data in steps.items())
 
 			for node_id, data in steps.items():
+				workers_last_activity[test_id][node_id] = time.time()
+
 				for rec in data:
 					data_type = rec['type']
 					if data_type == stypes.RESPONSE_STATUS:
@@ -265,10 +271,22 @@ def process_steps (test_id):
 		else:
 			break
 
-	if len(finish_que[test_id]) == test['worker_num']:
+	is_crashed = False
+	now = time.time()
+	for node_id, ts_last in workers_last_activity[test_id].items():
+		if now - ts_last >= WORKERS_TIMEOUT:
+			is_crashed = True
+			break
+
+	is_finished = len(finish_que[test_id]) == test['worker_num']
+
+	if is_crashed:
+		is_finished = True
+
+	if is_finished:
 		#print "finished"
 
-		tests_cache[test_id]['finished'] = time.time()
+		tests_cache[test_id]['finished'] = (now - WORKERS_TIMEOUT) if is_crashed else now
 		with conn:
 			c.execute('UPDATE tests SET data = ? WHERE id = ?', (dbdump(tests_cache[test_id]), test_id))
 		del tests_cache[test_id]
@@ -276,6 +294,8 @@ def process_steps (test_id):
 		del finish_que[test_id]
 
 		del step_ques[test_id]
+
+		del workers_last_activity[test_id]
 
 		timers[test_id].kill()
 		del timers[test_id]
