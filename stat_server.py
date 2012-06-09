@@ -448,6 +448,9 @@ def run ():
 	parser.add_argument('host', metavar='host', type=str, default='0.0.0.0', nargs='?')
 	args = parser.parse_args()
 
+	os.environ['TZ'] = 'UTC'
+	time.tzset()
+
 	logging.config.dictConfig(config.logging)
 
 	check_or_setup_db()
