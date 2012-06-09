@@ -1,5 +1,7 @@
 #coding: utf-8
 import argparse
+import logging
+import logging.config
 from gevent.pywsgi import WSGIServer, WSGIHandler
 from gevent.pool import Pool
 import gevent
@@ -20,15 +22,20 @@ import sqlite3
 import cPickle as pickle
 import zlib
 from pyramid.config import Configurator
-from pyramid.paster import (
-    get_appsettings,
-    setup_logging,
-)
+#from pyramid.paster import (
+    #get_appsettings,
+    #setup_logging,
+#)
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.renderers import null_renderer
 from pyramid.httpexceptions import HTTPNotFound, HTTPFound
 import util
+import config
+import os
+
+
+log = logging.getLogger(__name__)
 
 
 WORKERS_TIMEOUT = 10  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
@@ -130,6 +137,8 @@ def test_register (request):
 
 	timers[id] = util.start_periodic(1, process_steps, [id])
 	timers[id].link_exception()
+
+	log.info("registered test #%s" % id)
 
 	return id
 
@@ -284,8 +293,6 @@ def process_steps (test_id):
 		is_finished = True
 
 	if is_finished:
-		#print "finished"
-
 		tests_cache[test_id]['finished'] = (now - WORKERS_TIMEOUT) if is_crashed else now
 		with conn:
 			c.execute('UPDATE tests SET data = ? WHERE id = ?', (dbdump(tests_cache[test_id]), test_id))
@@ -299,6 +306,8 @@ def process_steps (test_id):
 
 		gevent.kill(timers[test_id])
 		del timers[test_id]
+
+		log.info("finished test #%s%s" % (test_id, " (timeout)" if is_crashed else ""))
 
 
 @view_config(route_name='report.get_data', renderer='json')
@@ -432,22 +441,25 @@ def _init_routes (config):
 	config.add_route('test.add_stats', '/add_stats/{test_id}')
 
 
-def _main ():
+
+def run ():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('port', metavar='port', type=int, default=7777, nargs='?')
 	parser.add_argument('host', metavar='host', type=str, default='0.0.0.0', nargs='?')
 	args = parser.parse_args()
 
+	logging.config.dictConfig(config.logging)
+
 	check_or_setup_db()
 
 	host = args.host
 	port = args.port
-	print '** Serving on %s:%s...' % (host, port)
+	log.info("Serving on %s:%s..." % (host, port))
 	try:
 		WSGIServer((host, port), papp(), handler_class=util.LogDisabled, spawn=Pool(100), environ={}).serve_forever()
 	except KeyboardInterrupt:
-		print "stopped"
+		log.info("interrupted")
 
 
 if __name__ == '__main__':
-	_main()
+	run()
