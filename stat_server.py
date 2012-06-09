@@ -297,7 +297,7 @@ def process_steps (test_id):
 
 		del workers_last_activity[test_id]
 
-		timers[test_id].kill()
+		gevent.kill(timers[test_id])
 		del timers[test_id]
 
 
