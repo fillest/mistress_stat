@@ -250,7 +250,7 @@
 						});
 					}
 
-					//setTimeout(load_plots_data, 3000);
+					setTimeout(load_plots_data, 3000);
 				}
 				load_plots_data();
 			});
