@@ -190,6 +190,7 @@ def process_steps (test_id):
 			is_finish_only_step = all(len(data) == 1 and data[0]['type'] == stypes.FINISH_TEST for node_id, data in steps.items())
 
 			for node_id, data in steps.items():
+				node_id = int(node_id)
 				workers_last_activity[test_id][node_id] = time.time()
 
 				for rec in data:
