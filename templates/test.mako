@@ -139,6 +139,10 @@
 								window.console && console.log(jqXHR);
 							},
 							success: function onDataReceived(data) {
+								if (data.finished) {
+									window.stop = true;
+								}
+
 								var diff = (data.finished - data.started) * 1000;
 								var vhourDiff = Math.floor(diff/1000/60/60);  // in hours
 								diff -= vhourDiff*1000*60*60;
