@@ -33,6 +33,7 @@ from pyramid.httpexceptions import HTTPNotFound, HTTPFound
 import util
 import config
 import os
+import sapyens.helpers
 
 
 log = logging.getLogger(__name__)
@@ -101,6 +102,15 @@ def check_or_setup_db ():
 				data BLOB
 			)""")
 
+
+@sapyens.helpers.add_route('test.delete', '/test/delete/{id:\d+}')
+@view_config(route_name='test.delete')
+def test_delete (request):
+	test_id = int(request.matchdict['id'])
+	c.execute('DELETE FROM tests where id = ?', (test_id,))
+	#TODO clear cache
+
+	return HTTPFound(location = request.route_path('report.list'))
 
 @view_config(route_name='test.register', renderer='string')
 def test_register (request):
