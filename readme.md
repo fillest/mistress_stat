@@ -2,7 +2,8 @@
 This distribution is **statistics server** component of Mistress.
 
 ## Setup
-	cd mistress-stat
+    sudo apt-get install libpq-dev
+    cd mistress-stat
     virtualenv --no-site-packages venv
     source venv/bin/activate
     pip install -r req.txt

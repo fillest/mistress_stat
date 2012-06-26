@@ -18,3 +18,7 @@ venusian==1.0a3
 watchdog==0.6.0
 zope.deprecation==3.5.1
 zope.interface==3.8.0
+psycopg2==2.4.5
+hg+https://bitbucket.org/danfairs/psycogreen
+SQLAlchemy==0.7.7
+git+git://github.com/fillest/sapyens.git

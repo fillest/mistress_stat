@@ -1,12 +1,14 @@
 #coding: utf-8
+import gevent.monkey
+gevent.monkey.patch_all()
+import psycogreen.gevent.psyco_gevent
+psycogreen.gevent.psyco_gevent.make_psycopg_green()
 import argparse
 import logging
 import logging.config
 from gevent.pywsgi import WSGIServer, WSGIHandler
 from gevent.pool import Pool
 import gevent
-import gevent.monkey
-gevent.monkey.patch_all()
 from webob import Request
 import time
 import sys
@@ -18,7 +20,6 @@ import collections
 from collections import defaultdict
 import gevent.core
 from routes import Mapper
-import sqlite3
 import cPickle as pickle
 import zlib
 from pyramid.config import Configurator
@@ -34,6 +35,11 @@ import util
 import config
 import os
 import sapyens.helpers
+import sapyens.db
+from sqlalchemy import engine_from_config
+import db
+from db import DBSession
+import psycopg2
 
 
 log = logging.getLogger(__name__)
@@ -59,9 +65,8 @@ class StepsQueue (object):
 		else:
 			return None
 
-conn = sqlite3.connect('tests.sqlite')
-#conn.text_factory = str  #pickle storing workaround
-c = conn.cursor()
+class Test (db.Reflected, db.QueryPropertyMixin):
+	__tablename__ = 'tests'
 
 
 class stypes (object):
@@ -87,27 +92,17 @@ workers_last_activity = {}
 
 
 def dbdump (o):
-	return sqlite3.Binary(pickle.dumps(o, 2))
-
-
-
-def check_or_setup_db ():
-	with conn:
-		c.execute("""SELECT count(*) FROM sqlite_master
-			WHERE type = 'table' and name = 'tests'""")
-		if not c.fetchone()[0]:
-			print "** creating db tables"
-			conn.execute("""CREATE TABLE tests(
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				data BLOB
-			)""")
+	return pickle.dumps(o, 2)
 
 
 @sapyens.helpers.add_route('test.delete', '/test/delete/{id:\d+}')
 @view_config(route_name='test.delete')
 def test_delete (request):
 	test_id = int(request.matchdict['id'])
-	c.execute('DELETE FROM tests where id = ?', (test_id,))
+
+	Test.query.filter_by(id = test_id).delete()
+	DBSession.commit()
+
 	#TODO clear cache
 
 	return HTTPFound(location = request.route_path('report.list'))
@@ -137,8 +132,11 @@ def test_register (request):
 		#'state': 'created',
 	}
 
-	with conn:
-		id = c.execute('insert into tests (data) values (?)', (dbdump(test),)).lastrowid
+	t = Test(data = dbdump(test))
+	DBSession.add(t)
+	DBSession.commit()
+	id = t.id
+
 	tests_cache[id] = test
 
 	step_ques[id] = StepsQueue(test['worker_num'])
@@ -305,8 +303,9 @@ def process_steps (test_id):
 
 	if is_finished:
 		tests_cache[test_id]['finished'] = (now - WORKERS_TIMEOUT) if is_crashed else now
-		with conn:
-			c.execute('UPDATE tests SET data = ? WHERE id = ?', (dbdump(tests_cache[test_id]), test_id))
+		DBSession.query(Test).filter_by(id = test_id).update({Test.data: dbdump(tests_cache[test_id])})
+		DBSession.commit()
+
 		del tests_cache[test_id]
 
 		del finish_que[test_id]
@@ -327,10 +326,10 @@ def report_get_data (request):
 	if test_id in tests_cache:
 		test = tests_cache[test_id]
 	else:
-		res = c.execute('SELECT data FROM tests where id = ?', (test_id,)).fetchone()
-		if not res:
+		t = Test.query.filter_by(id = test_id).first()
+		if not t:
 			return HTTPNotFound()
-		test = pickle.loads(str(res[0]))
+		test = pickle.loads(str(t.data))
 
 	t = test['started']
 	r = test['result']
@@ -385,17 +384,19 @@ def report_get_data (request):
 @view_config(route_name='report.view', renderer='test.mako')
 def report_view (request):
 	test_id = request.matchdict['test_id']
-	if test_id == 'latest':
-		res = c.execute('SELECT max(id) FROM tests').fetchone()
-		if not res or not res[0]:
-			return HTTPNotFound()
-		test_id = res[0]
-	else:
-		test_id = int(test_id)
-		if not c.execute('SELECT count(*) FROM tests where id = ?', (test_id,)).fetchone()[0]:
+	#if test_id == 'latest':
+		#res = c.execute('SELECT max(id) FROM tests').fetchone()
+		#if not res or not res[0]:
+			#return HTTPNotFound()
+		#test_id = res[0]
+	#else:
+	if True:
+		#test_id = int(test_id)
+		t = Test.query.filter_by(id = test_id).first()
+		if not t:
 			return HTTPNotFound()
 
-	data = pickle.loads(str(c.execute('SELECT data FROM tests where id = ?', (test_id,)).fetchone()[0]))
+	data = pickle.loads(str(t.data))
 
 	return {
 		'test_id': test_id,
@@ -406,8 +407,8 @@ def report_view (request):
 @view_config(route_name='report.list', renderer='list.mako')
 def report_list (request):
 	tests = []
-	for v in c.execute('SELECT id, data FROM tests order by id desc'):
-		tests.append((v[0], pickle.loads(str(v[1]))))
+	for t in Test.query.order_by(Test.id.desc()):
+		tests.append((t.id, pickle.loads(str(t.data))))
 
 	return {
 		'tests': tests
@@ -464,7 +465,8 @@ def run ():
 
 	logging.config.dictConfig(config.logging)
 
-	check_or_setup_db()
+	settings = {'sqlalchemy.url': 'postgresql+psycopg2://postgres:postgres@localhost/mistress'}
+	db.init(engine_from_config(settings, 'sqlalchemy.'))
 
 	host = args.host
 	port = args.port
