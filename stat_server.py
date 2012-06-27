@@ -158,7 +158,7 @@ def no_response (_environ, _start_response):
 def test_add_stats (request):
 	test_id = int(request.matchdict['test_id'])
 	if test_id not in tests_cache:
-		print "** add_stats: test_id not in tests_cache: %s" % test_id  #TODO ?
+		log.error("add_stats: test_id not in tests_cache: %s" % test_id)  #TODO ?
 		return no_response
 
 	pack = json.loads(zlib.decompress(request.body))
@@ -195,7 +195,7 @@ def process_steps (test_id):
 			buf_start_session = 0
 			buf_request_sent = 0
 
-			is_finish_only_step = all(len(data) == 1 and data[0]['type'] == stypes.FINISH_TEST for node_id, data in steps.items())
+			is_finish_only_step = all(len(data) == 1 and data[0]['type'] == stypes.FINISH_TEST for _node_id, data in steps.items())
 
 			for node_id, data in steps.items():
 				node_id = int(node_id)
@@ -291,7 +291,7 @@ def process_steps (test_id):
 
 	is_crashed = False
 	now = time.time()
-	for node_id, ts_last in workers_last_activity[test_id].items():
+	for _node_id, ts_last in workers_last_activity[test_id].items():
 		if now - ts_last >= WORKERS_TIMEOUT:
 			is_crashed = True
 			break
