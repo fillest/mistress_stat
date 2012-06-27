@@ -425,7 +425,8 @@ def papp ():
 		'pyramid.default_locale_name': 'en',
 		'pyramid.includes': ['pyramid_debugtoolbar'],
 
-		'debugtoolbar.hosts': '10.40.25.155',
+		#'debugtoolbar.hosts': '10.40.25.155',
+		'debugtoolbar.enabled': 'false',
 
 		'mako.directories': 'templates',
 		'mako.module_directory': '/tmp/mistress_statserver/compiled_templates',
