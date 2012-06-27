@@ -310,7 +310,7 @@
 						##<br/><br/>
 					</td>
 				</tr>
-				<tr>
+				<tr style="display:none;">
 					<td>Response time<div class="legend" id="legend_resp1"></div></td>
 					<td><div class="js-plot" id="plot_resp1" style="height: 400px"></div></td>
 					<td></td>
@@ -320,7 +320,7 @@
 					<td><div class="js-plot" id="plot_conn" style="height: 200px"></div></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr style="display:none;">
 					<td>Connection time<div class="legend" id="legend_conn1"></div></td>
 					<td><div class="js-plot" id="plot_conn1" style="height: 200px"></div></td>
 					<td></td>
