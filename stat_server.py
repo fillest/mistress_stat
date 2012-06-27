@@ -45,7 +45,7 @@ import psycopg2
 log = logging.getLogger(__name__)
 
 
-WORKERS_TIMEOUT = 10  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
+WORKERS_TIMEOUT = 40  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
 
 
 class StepsQueue (object):
