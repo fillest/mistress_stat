@@ -18,8 +18,13 @@
 
 %if tests:
 	<ul class="report-list">
-		%for id, data in tests:
-			<li><a href="${request.route_path('report.view', test_id=id)}">#${id}&nbsp;&nbsp;&nbsp;<span class="js-date" data-utc-time="${int(data['started'] * 1000)}">...</span></a></li>
+		%for report, data in tests:
+			<li>
+				<table><tbody><tr>
+					<td style="vertical-align: top;"><a href="${request.route_path('report.view', test_id=report.id)}">#${report.id}&nbsp;&nbsp;&nbsp;<span class="js-date" data-utc-time="${int(data['started'] * 1000)}">...</span></a></td>
+					<td><pre style="margin: 0 0 0 1em;">${report.comment}</pre></td>
+				</tr></tbody></table>
+			</li>
 		%endfor
 	</ul>
 %else:

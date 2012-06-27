@@ -107,6 +107,16 @@ def test_delete (request):
 
 	return HTTPFound(location = request.route_path('report.list'))
 
+@sapyens.helpers.add_route('test.save_comment', '/test/save_comment/{id:\d+}')
+@view_config(route_name='test.save_comment')
+def test_save_comment (request):
+	test_id = int(request.matchdict['id'])
+
+	DBSession.query(Test).filter_by(id = test_id).update({Test.comment: request.POST['comment']})
+	DBSession.commit()
+
+	return HTTPFound(location = request.route_path('report.view', test_id = test_id))
+
 @view_config(route_name='test.register', renderer='string')
 def test_register (request):
 	test = {
@@ -402,13 +412,14 @@ def report_view (request):
 		'test_id': test_id,
 		'started': data['started'],
 		'finished': data.get('finished'),
+		'report': t,
 	}
 
 @view_config(route_name='report.list', renderer='list.mako')
 def report_list (request):
 	tests = []
 	for t in Test.query.order_by(Test.id.desc()):
-		tests.append((t.id, pickle.loads(str(t.data))))
+		tests.append((t, pickle.loads(str(t.data))))
 
 	return {
 		'tests': tests
@@ -437,7 +448,7 @@ def papp ():
 		settings = settings,
 	)
 
-	config.add_static_view('js', 'static/js', cache_max_age=3600)
+	config.add_static_view('static', 'static', cache_max_age=3600)
 
 	_init_routes(config)
 

@@ -3,8 +3,8 @@
 <%block name="title">Report #${test_id} — Mistress</%block>
 
 
-		<script type="text/javascript" src="/js/flot/jquery.flot.js"></script>
-		<script type="text/javascript" src="/js/flot/jquery.flot.crosshair.js"></script>
+		<script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
+		<script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.js"></script>
 		##<script type="text/javascript" src="/js/flot/jquery.flot.navigate.js"></script>
 		##<script type="text/javascript" src="/js/flot/jquery.flot.navigate.patched.js"></script>
 
@@ -273,14 +273,25 @@
 			.xAxis .tickLabel:nth-child(even) {color: #aaa;}
 			.nav a {margin-right: 1em;}
 			.js-plot {width: 1100px;}
+			.nav-icon:hover {opacity: 0.5;}
 		</style>
 
 
 		##<button onclick="window.stop = ! window.stop;">pause/resume</button>
 
 		<div class="nav">
-			<a href="${request.route_path('report.list')}">list</a>
-			<a href="/report/${test_id}">#</a>
+			<a href="${request.route_path('report.list')}"><img class="nav-icon" title="back to list" src="/static/img/glyphicons_small/glyphicons_114_list.png" style="width: 16px;" alt="back to report list"" /></a>
+			<a href="/report/${test_id}"><img class="nav-icon" title="link to this report" src="/static/img/glyphicons_small/glyphicons_050_link.png" style="width: 13px;" alt="#" /></a>
+		</div>
+
+		<hr />
+
+		<div>
+			Comment
+			<form action="${request.route_path('test.save_comment', id = test_id)}" method="post" style="display: inline;">
+				<textarea name="comment" rows="2" cols="100" style="vertical-align: top; margin-left: 0.5em;">${report.comment}</textarea>
+				<input type="submit" value="save">
+			</form>
 		</div>
 
 		<hr />
@@ -289,12 +300,12 @@
 			<span>Report #${test_id}</span>
 			##<a href="${request.route_path('test.delete', id = test_id)}">delete</a>
 			<table><tbody>
-				<tr><td>Test duration:</td><td style="padding-left: 1em;"><span id="test_duration_value">...</span> (<span class="js-date" data-utc-time="${int(started * 1000)}">...</span> - <span class="js-date" data-utc-time="${int(finished * 1000) if finished else 0}">...</span>)</td></tr>
-				<tr><td>Requests total:</td><td style="padding-left: 1em;"><span id="test_reqs_total_value">...</span></td></tr>
-				<tr><td>Successful responses total:</td><td style="padding-left: 1em;"><span id="test_resp_successful_total_value">...</span></td></tr>
-				<tr><td>Response bad statuses total:</td><td style="padding-left: 1em;"><span id="test_resp_bad_statuses_total_value">...</span></td></tr>
-				<tr><td>Response timeouts total:</td><td style="padding-left: 1em;"><span id="test_resp_timeouts_total_value">...</span></td></tr>
-				<tr><td>Response errors total:</td><td style="padding-left: 1em;"><span id="test_resp_errors_total_value">...</span></td></tr>
+				<tr><td>Test duration</td><td style="padding-left: 1em;"><span id="test_duration_value">...</span> (<span class="js-date" data-utc-time="${int(started * 1000)}">...</span> - <span class="js-date" data-utc-time="${int(finished * 1000) if finished else 0}">...</span>)</td></tr>
+				<tr><td>Requests total</td><td style="padding-left: 1em;"><span id="test_reqs_total_value">...</span></td></tr>
+				<tr><td>Successful responses total</td><td style="padding-left: 1em;"><span id="test_resp_successful_total_value">...</span></td></tr>
+				<tr><td>Response bad statuses total</td><td style="padding-left: 1em;"><span id="test_resp_bad_statuses_total_value">...</span></td></tr>
+				<tr><td>Response timeouts total</td><td style="padding-left: 1em;"><span id="test_resp_timeouts_total_value">...</span></td></tr>
+				<tr><td>Response errors total</td><td style="padding-left: 1em;"><span id="test_resp_errors_total_value">...</span></td></tr>
 			</tbody></table>
 		</div>
 
@@ -303,7 +314,7 @@
 		<div style="">
 			<table class="plots"><tbody>
 				<tr>
-					<td>Response time<div class="legend" id="legend_resp"></div></td>
+					<td>Response latency<div class="legend" id="legend_resp"></div></td>
 					<td><div class="js-plot" id="plot_resp" style="height: 400px"></div></td>
 					<td>
 						##<label><input type="checkbox" checked="checked" autocomplete="off" />log-scale Y axis</label>
@@ -311,22 +322,22 @@
 					</td>
 				</tr>
 				<tr style="display:none;">
-					<td>Response time<div class="legend" id="legend_resp1"></div></td>
+					<td>Response latency<div class="legend" id="legend_resp1"></div></td>
 					<td><div class="js-plot" id="plot_resp1" style="height: 400px"></div></td>
 					<td></td>
 				</tr>
 				<tr>
-					<td>Connection time<div class="legend" id="legend_conn"></div></td>
+					<td>Connection latency<div class="legend" id="legend_conn"></div></td>
 					<td><div class="js-plot" id="plot_conn" style="height: 200px"></div></td>
 					<td></td>
 				</tr>
 				<tr style="display:none;">
-					<td>Connection time<div class="legend" id="legend_conn1"></div></td>
+					<td>Connection latency<div class="legend" id="legend_conn1"></div></td>
 					<td><div class="js-plot" id="plot_conn1" style="height: 200px"></div></td>
 					<td></td>
 				</tr>
 				<tr>
-					<td>RPS, 200-responses<div class="legend" id="legend_rps"></div></td>
+					<td>Throughput<div class="legend" id="legend_rps"></div></td>
 					<td><div class="js-plot" id="plot_rps" style="height: 300px"></div></td>
 					<td></td>
 				</tr>
@@ -336,7 +347,7 @@
 					<td></td>
 				</tr>
 				<tr>
-					<td>Concurrency, spawn rate<div class="legend" id="legend_concur"></div></td>
+					<td>Concurrency<div class="legend" id="legend_concur"></div></td>
 					<td><div class="js-plot" id="plot_concur" style="height: 150px"></div></td>
 					<td></td>
 				</tr>
