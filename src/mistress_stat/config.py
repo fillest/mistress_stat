@@ -14,19 +14,19 @@ logging = {
 #			handlers = ['stdio'],
 #		),
 	'loggers': {
-		#'arss': dict(
-			#level = 'DEBUG',
-			#handlers = ['stdio'],
-#
-		#),
-		'__main__': dict(
+		'mistress_stat': dict(
 			level = 'DEBUG',
 			handlers = ['stdio'],
+
 		),
-		#'sqlalchemy.engine': dict(
-			#level = 'WARN',
+		#'__main__': dict(
+			#level = 'DEBUG',
 			#handlers = ['stdio'],
 		#),
+		'sqlalchemy.engine': dict(
+			level = 'WARN',
+			handlers = ['stdio'],
+		),
 	},
 
 	#http://docs.python.org/library/logging.html#logrecord-attributes

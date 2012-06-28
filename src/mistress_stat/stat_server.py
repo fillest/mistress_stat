@@ -39,13 +39,14 @@ import sapyens.db
 from sqlalchemy import engine_from_config
 import db
 from db import DBSession
+from mistress_stat.db.models import Test
 import psycopg2
 
 
 log = logging.getLogger(__name__)
 
 
-WORKERS_TIMEOUT = 40  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
+WORKERS_TIMEOUT = 60  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
 
 
 class StepsQueue (object):
@@ -65,8 +66,7 @@ class StepsQueue (object):
 		else:
 			return None
 
-class Test (db.Reflected, db.QueryPropertyMixin):
-	__tablename__ = 'tests'
+
 
 
 class stypes (object):
@@ -157,7 +157,6 @@ def test_register (request):
 	timers[id].link_exception()
 
 	log.info("registered test #%s" % id)
-
 	return id
 
 
@@ -313,7 +312,10 @@ def process_steps (test_id):
 
 	if is_finished:
 		tests_cache[test_id]['finished'] = (now - WORKERS_TIMEOUT) if is_crashed else now
-		DBSession.query(Test).filter_by(id = test_id).update({Test.data: dbdump(tests_cache[test_id])})
+		#DBSession.query(Test).filter_by(id = test_id).update({Test.data: dbdump(tests_cache[test_id])})
+		t = DBSession.query(Test).filter_by(id = test_id).one()
+		t.data = dbdump(tests_cache[test_id])
+		DBSession.add(t)
 		DBSession.commit()
 
 		del tests_cache[test_id]
@@ -415,15 +417,7 @@ def report_view (request):
 		'report': t,
 	}
 
-@view_config(route_name='report.list', renderer='list.mako')
-def report_list (request):
-	tests = []
-	for t in Test.query.order_by(Test.id.desc()):
-		tests.append((t, pickle.loads(str(t.data))))
 
-	return {
-		'tests': tests
-	}
 
 
 def papp ():
@@ -452,7 +446,7 @@ def papp ():
 
 	_init_routes(config)
 
-	config.scan()
+	config.scan(package='mistress_stat')
 
 	return config.make_wsgi_app()
 
