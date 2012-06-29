@@ -1,3 +1,6 @@
+import logging
+
+
 logging = {
 	'version': 1,
 	'disable_existing_loggers': True,
@@ -5,26 +8,21 @@ logging = {
 		'stdio': {
 			'class': 'logging.StreamHandler',
 			'formatter': 'simple',
-			'level': 'NOTSET',
+			'level': logging.NOTSET,
 			'stream': 'ext://sys.stdout'
 		},
 	},
-#		'root': dict(
-#			level = logging.INFO,
-#			handlers = ['stdio'],
-#		),
 	'loggers': {
 		'mistress_stat': dict(
-			level = 'DEBUG',
+			level = logging.DEBUG,
 			handlers = ['stdio'],
-
 		),
-		#'__main__': dict(
-			#level = 'DEBUG',
-			#handlers = ['stdio'],
-		#),
+		'__main__': dict(
+			level = logging.DEBUG,
+			handlers = ['stdio'],
+		),
 		'sqlalchemy.engine': dict(
-			level = 'WARN',
+			level = logging.WARN,
 			handlers = ['stdio'],
 		),
 	},
