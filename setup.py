@@ -21,5 +21,7 @@ setuptools.setup(
 	entry_points = """\
 		[paste.app_factory]
 			main = mistress_stat:main
+		[console_scripts]
+			create_user = mistress_stat.scripts.create_user:main
 	""",
 )
