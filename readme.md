@@ -11,7 +11,7 @@ This distribution is **statistics server** component of Mistress.
 ## Usage
 	cd mistress-stat
 	source venv/bin/activate
-    ./run
+    ./run config.ini
 
 ##License
 [The MIT License](http://www.opensource.org/licenses/mit-license.php)

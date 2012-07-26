@@ -2,6 +2,7 @@ import setuptools
 
 
 requires = [
+	# see req.txt
 ]
 
 
@@ -17,4 +18,8 @@ setuptools.setup(
 	include_package_data=True,
 	zip_safe=False,
 	install_requires = requires,
+	entry_points = """\
+		[paste.app_factory]
+			main = mistress_stat:main
+	""",
 )

@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 set -e
 
-watchmedo auto-restart -R -p '*.py' python -- src/mistress_stat/stat_server.py "$@"
+watchmedo auto-restart -R -p '*.py;*.ini' python -- src/mistress_stat/stat_server.py "$@"

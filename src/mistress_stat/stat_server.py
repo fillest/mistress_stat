@@ -23,16 +23,11 @@ from routes import Mapper
 import cPickle as pickle
 import zlib
 from pyramid.config import Configurator
-#from pyramid.paster import (
-    #get_appsettings,
-    #setup_logging,
-#)
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.renderers import null_renderer
 from pyramid.httpexceptions import HTTPNotFound, HTTPFound
 import util
-import config
 import os
 import sapyens.helpers
 import sapyens.db
@@ -41,6 +36,7 @@ import db
 from db import DBSession
 from mistress_stat.db.models import Test
 import psycopg2
+import pyramid.paster
 
 
 log = logging.getLogger(__name__)
@@ -423,26 +419,7 @@ def report_view (request):
 	}
 
 
-
-
-def papp ():
-	#~ settings = get_appsettings('test.ini')
-	settings = {
-		'pyramid.reload_templates': True,
-		'pyramid.debug_authorization': False,
-		'pyramid.debug_notfound': False,
-		'pyramid.debug_routematch': False,
-		'pyramid.default_locale_name': 'en',
-		'pyramid.includes': ['pyramid_debugtoolbar'],
-
-		#'debugtoolbar.hosts': '10.40.25.155',
-		'debugtoolbar.enabled': 'false',
-
-		'mako.directories': 'templates',
-		'mako.module_directory': '/tmp/mistress_statserver/compiled_templates',
-		'mako.strict_undefined': 'true',
-    }
-
+def make_wsgi_app (settings):
 	config = Configurator(
 		settings = settings,
 	)
@@ -451,7 +428,7 @@ def papp ():
 
 	_init_routes(config)
 
-	config.scan(package='mistress_stat')
+	config.scan(package = 'mistress_stat')
 
 	return config.make_wsgi_app()
 
@@ -467,23 +444,24 @@ def _init_routes (config):
 
 def run ():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('port', metavar='port', type=int, default=7777, nargs='?')
-	parser.add_argument('host', metavar='host', type=str, default='0.0.0.0', nargs='?')
+	parser.add_argument('config')
+	parser.add_argument('--port', type = int, default = 7777)
+	parser.add_argument('--host', default = '0.0.0.0')
 	args = parser.parse_args()
 
 	os.environ['TZ'] = 'UTC'
 	time.tzset()
 
-	logging.config.dictConfig(config.logging)
+	pyramid.paster.setup_logging(args.config)
 
-	settings = {'sqlalchemy.url': 'postgresql+psycopg2://postgres:postgres@localhost/mistress'}
+	settings = pyramid.paster.get_appsettings(args.config)
 	db.init(engine_from_config(settings, 'sqlalchemy.'))
 
 	host = args.host
 	port = args.port
 	log.info("Serving on %s:%s..." % (host, port))
 	try:
-		WSGIServer((host, port), papp(), handler_class=util.LogDisabled, spawn=Pool(100), environ={}).serve_forever()
+		WSGIServer((host, port), make_wsgi_app(settings), handler_class=util.LogDisabled, spawn=Pool(100), environ={}).serve_forever()
 	except KeyboardInterrupt:
 		log.info("interrupted")
 
