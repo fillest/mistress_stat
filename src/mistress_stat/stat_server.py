@@ -37,47 +37,14 @@ from db import DBSession
 from mistress_stat.db.models import Test
 import psycopg2
 import pyramid.paster
+import pyramid.session
+from mistress_stat.lib import StepsQueue, stypes, dbdump, no_response
 
 
 log = logging.getLogger(__name__)
 
 
 WORKERS_TIMEOUT = 60  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
-
-
-class StepsQueue (object):
-	def __init__ (self, nodes_num):
-		self._buf = defaultdict(dict)
-		self._step = 1
-		self._nodes_num = nodes_num
-
-	def put (self, data, step, node_id):
-		self._buf[step][node_id] = data
-
-	def next (self):
-		steps = self._buf.get(self._step)
-		if steps and (len(steps) == self._nodes_num):
-			self._step += 1
-			return steps
-		else:
-			return None
-
-
-
-
-class stypes (object):
-	CONCUR_USERS_NUM_MAX = 2
-	START_SESSION = 3
-	RESPONSE_TIME = 4
-	RESPONSE_STATUS = 5
-	REQUEST_SENT = 6
-	CONNECT_TIME = 7
-	CONCUR_USERS_NUM_MIN = 8
-	CONNECT_ERROR = 9
-	RESPONSE_ERROR = 10
-	CONCUR_CONNS_NUM_MIN = 11
-	CONCUR_CONNS_NUM_MAX = 12
-	FINISH_TEST = 13
 
 
 tests_cache = {}
@@ -87,37 +54,7 @@ finish_que = defaultdict(dict)
 workers_last_activity = {}
 
 
-def dbdump (o):
-	return pickle.dumps(o, 2)
-
-
-@sapyens.helpers.add_route('test.delete', '/test/delete/{id:\d+}')
-@view_config(route_name='test.delete')
-def test_delete (request):
-	test_id = int(request.matchdict['id'])
-
-	Test.query.filter_by(id = test_id).delete()
-	DBSession.commit()
-
-	#TODO clear cache
-
-	return HTTPFound(location = request.route_path('report.list'))
-
-@sapyens.helpers.add_route('root', '/')
-@view_config(route_name='root')
-def root_stub (request):
-	return HTTPFound(location = request.route_url('report.list'))
-
-@sapyens.helpers.add_route('test.save_comment', '/test/save_comment/{id:\d+}')
-@view_config(route_name='test.save_comment')
-def test_save_comment (request):
-	test_id = int(request.matchdict['id'])
-
-	DBSession.query(Test).filter_by(id = test_id).update({Test.comment: request.POST['comment']})
-	DBSession.commit()
-
-	return HTTPFound(location = request.route_path('report.view', test_id = test_id))
-
+@sapyens.helpers.add_route('test.register', '/new_test')
 @view_config(route_name='test.register', renderer='string')
 def test_register (request):
 	test = {
@@ -161,9 +98,9 @@ def test_register (request):
 	return id
 
 
-def no_response (_environ, _start_response):
-	return []
 
+
+@sapyens.helpers.add_route('test.add_stats', '/add_stats/{test_id}')
 @view_config(route_name='test.add_stats', renderer=null_renderer)
 def test_add_stats (request):
 	test_id = int(request.matchdict['test_id'])
@@ -333,6 +270,7 @@ def process_steps (test_id):
 		log.info("finished test #%s%s" % (test_id, " (timeout)" if is_crashed else ""))
 
 
+@sapyens.helpers.add_route('report.get_data', '/get_data/{test_id}')
 @view_config(route_name='report.get_data', renderer='json')
 def report_get_data (request):
 	test_id = int(request.matchdict['test_id'])
@@ -394,52 +332,19 @@ def report_get_data (request):
 
 	return result
 
-@view_config(route_name='report.view', renderer='test.mako')
-def report_view (request):
-	test_id = request.matchdict['test_id']
-	#if test_id == 'latest':
-		#res = c.execute('SELECT max(id) FROM tests').fetchone()
-		#if not res or not res[0]:
-			#return HTTPNotFound()
-		#test_id = res[0]
-	#else:
-	if True:
-		#test_id = int(test_id)
-		t = Test.query.filter_by(id = test_id).first()
-		if not t:
-			return HTTPNotFound()
-
-	data = pickle.loads(str(t.data))
-
-	return {
-		'test_id': test_id,
-		'started': data['started'],
-		'finished': data.get('finished'),
-		'report': t,
-	}
-
-
 def make_wsgi_app (settings):
 	config = Configurator(
 		settings = settings,
+		session_factory = pyramid.session.UnencryptedCookieSessionFactoryConfig(
+			'secret_shit', cookie_name = 's', timeout = 60*60*24*3, cookie_max_age = 60*60*24*3,
+		),
 	)
 
 	config.add_static_view('static', 'static', cache_max_age=3600)
 
-	_init_routes(config)
-
 	config.scan(package = 'mistress_stat')
 
 	return config.make_wsgi_app()
-
-def _init_routes (config):
-	config.add_route('report.list', '/report/list')
-	config.add_route('report.view', '/report/{test_id}')
-	config.add_route('report.get_data', '/get_data/{test_id}')
-	config.add_route('test.register', '/new_test')
-	config.add_route('test.finish', '/finish_test/{test_id}')
-	config.add_route('test.add_stats', '/add_stats/{test_id}')
-
 
 
 def run ():
