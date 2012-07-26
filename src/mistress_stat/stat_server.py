@@ -107,6 +107,11 @@ def test_delete (request):
 
 	return HTTPFound(location = request.route_path('report.list'))
 
+@sapyens.helpers.add_route('root', '/')
+@view_config(route_name='root')
+def root_stub (request):
+	return HTTPFound(location = request.route_url('report.list'))
+
 @sapyens.helpers.add_route('test.save_comment', '/test/save_comment/{id:\d+}')
 @view_config(route_name='test.save_comment')
 def test_save_comment (request):
