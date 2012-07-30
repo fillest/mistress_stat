@@ -39,6 +39,7 @@ import psycopg2
 import pyramid.paster
 import pyramid.session
 from mistress_stat.lib import StepsQueue, stypes, dbdump, no_response
+import pyramid.tweens
 
 
 log = logging.getLogger(__name__)
@@ -332,6 +333,21 @@ def report_get_data (request):
 
 	return result
 
+
+def autocommit_tween_factory (handler, registry):
+	def tween (request):
+		try:
+			response = handler(request)
+			DBSession.commit()
+		except:
+			DBSession.rollback()
+			raise
+		finally:
+			DBSession.remove()
+
+		return response
+	return tween
+
 def make_wsgi_app (settings):
 	config = Configurator(
 		settings = settings,
@@ -340,12 +356,13 @@ def make_wsgi_app (settings):
 		),
 	)
 
+	config.add_tween('mistress_stat.stat_server.autocommit_tween_factory', under = pyramid.tweens.EXCVIEW)
+
 	config.add_static_view('static', 'static', cache_max_age=3600)
 
 	config.scan(package = 'mistress_stat')
 
 	return config.make_wsgi_app()
-
 
 def run ():
 	parser = argparse.ArgumentParser()
