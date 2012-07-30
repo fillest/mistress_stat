@@ -4,6 +4,11 @@
 <%block name="title">Report list — Mistress</%block>
 
 
+<div style="text-align: right;">
+	<a href="${request.route_path('admin/project.list')}">projects</a>
+</div>
+
+
 <style>
 	a:link {color: #333;}
 	a:visited {color: #333;}

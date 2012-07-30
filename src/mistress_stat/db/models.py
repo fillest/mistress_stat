@@ -6,3 +6,6 @@ class Test (Reflected, QueryPropertyMixin):
 
 class User (Reflected, QueryPropertyMixin):
 	__tablename__ = 'users'
+
+class Project (Reflected, QueryPropertyMixin):
+	__tablename__ = 'projects'
