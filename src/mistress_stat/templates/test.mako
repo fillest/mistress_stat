@@ -281,16 +281,16 @@
 
 		<div class="nav">
 			<a href="${request.route_path('report.list')}"><img class="nav-icon" title="back to list" src="/static/img/glyphicons_small/glyphicons_114_list.png" style="width: 16px;" alt="back to report list"" /></a>
-			<a href="/report/${test_id}"><img class="nav-icon" title="link to this report" src="/static/img/glyphicons_small/glyphicons_050_link.png" style="width: 13px;" alt="#" /></a>
+			##<a href="/report/${test_id}"><img class="nav-icon" title="link to this report" src="/static/img/glyphicons_small/glyphicons_050_link.png" style="width: 13px;" alt="#" /></a>
 		</div>
 
 		<hr />
 
 		<div>
-			Comment
+			<img title="Comment" src="/static/img/glyphicons_small/glyphicons_309_comments.png" alt="Comment" />
 			<form action="${request.route_path('test.save_comment', id = test_id)}" method="post" style="display: inline;">
 				<textarea name="comment" rows="2" cols="100" style="vertical-align: top; margin-left: 0.5em;">${report.comment}</textarea>
-				<input type="submit" value="save">
+				<input type="submit" value="update">
 			</form>
 		</div>
 
