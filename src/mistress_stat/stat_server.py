@@ -378,6 +378,7 @@ def make_wsgi_app (settings):
 	)
 
 	config.add_tween('mistress_stat.stat_server.autocommit_tween_factory', under = pyramid.tweens.EXCVIEW)
+	config.add_tween('sapyens.db.notfound_tween_factory', under = pyramid.tweens.EXCVIEW)
 
 	config.add_subscriber(_add_renderer_globals, pyramid.events.BeforeRender)
 
