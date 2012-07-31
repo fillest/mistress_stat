@@ -68,3 +68,12 @@ def test_save_comment (request):
 	DBSession.commit()
 
 	return HTTPFound(location = request.route_path('report.view', test_id = test_id))
+
+@sapyens.helpers.add_route('test.script', '/test/{id}/script')
+@view_config(route_name='test.script', renderer='script.mako')
+def report_script (request):
+	test = Test.try_get(id = request.matchdict['id'])
+
+	return {
+		'test': test,
+	}

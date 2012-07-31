@@ -85,7 +85,7 @@ def test_register (request):
 		#'state': 'created',
 	}
 
-	t = Test(data = dbdump(test))
+	t = Test(data = dbdump(test), script = request.body)
 	DBSession.add(t)
 	DBSession.commit()
 	id = t.id
