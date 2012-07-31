@@ -5,7 +5,7 @@
 
 		<title><%block name="title">Mistress</%block></title>
 
-		<script type="text/javascript" src="https://raw.github.com/timrwood/moment/1.5.0/min/moment.min.js"></script>
+		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/1.6.2/moment.min.js"></script>
 
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 		##<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
