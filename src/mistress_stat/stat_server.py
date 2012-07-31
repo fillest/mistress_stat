@@ -35,11 +35,15 @@ from sqlalchemy import engine_from_config
 import db
 from db import DBSession
 from mistress_stat.db.models import Test
+import mistress_stat.db.models as models
 import psycopg2
 import pyramid.paster
 import pyramid.session
 from mistress_stat.lib import StepsQueue, stypes, dbdump, no_response
 import pyramid.tweens
+import pyramid.events
+import pyramid.security
+import pyramid.authentication
 
 
 log = logging.getLogger(__name__)
@@ -348,15 +352,34 @@ def autocommit_tween_factory (handler, registry):
 		return response
 	return tween
 
+
+def _add_renderer_globals (event):
+	event['authenticated_userid'] = pyramid.security.authenticated_userid
+
+def group_finder (userid, request):
+	user = models.User.query.filter_by(name = userid).first()
+	if user:
+		return ['group:%s' % user.group]
+	else:
+		#TODO ?
+		return None
+
 def make_wsgi_app (settings):
 	config = Configurator(
 		settings = settings,
 		session_factory = pyramid.session.UnencryptedCookieSessionFactoryConfig(
 			'secret_shit', cookie_name = 's', timeout = 60*60*24*3, cookie_max_age = 60*60*24*3,
 		),
+		authentication_policy = pyramid.authentication.SessionAuthenticationPolicy(
+			prefix = 'auth.',
+			callback = group_finder,
+			debug = False
+		),
 	)
 
 	config.add_tween('mistress_stat.stat_server.autocommit_tween_factory', under = pyramid.tweens.EXCVIEW)
+
+	config.add_subscriber(_add_renderer_globals, pyramid.events.BeforeRender)
 
 	config.add_static_view('static', 'static', cache_max_age=3600)
 
