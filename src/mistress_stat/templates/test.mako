@@ -1,6 +1,6 @@
 <%inherit file="/base.mako" />
 
-<%block name="title">Report #${test_id} — Mistress</%block>
+<%block name="title">Report #${test_id}</%block>
 
 
 		<script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>

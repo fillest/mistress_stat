@@ -3,7 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-		<title><%block name="title">Mistress</%block></title>
+		<title><%block name="title">Untitled</%block> — Mistress</title>
 
 		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/1.6.2/moment.min.js"></script>
 
@@ -25,6 +25,17 @@
 		</script>
     </head>
     <body>
+		<div style="text-align: right;">
+			% if authenticated_userid (request):
+				${authenticated_userid(request)} - <a href="${request.route_path('logout')}">Log out</a>
+			% else:
+				<a href="${request.route_path('login')}">Log in</a>
+			% endif
+
+			|
+			<a href="${request.route_path('admin/project.list')}">projects</a>
+		</div>
+
         ${next.body()}
     </body>
 </html>

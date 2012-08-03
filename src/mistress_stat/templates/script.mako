@@ -1,7 +1,7 @@
 <%inherit file="/base.mako" />
 
 
-<%block name="title">Report #${test.id} script — Mistress</%block>
+<%block name="title">Report #${test.id} script</%block>
 
 
 <link rel="stylesheet" href="/static/highlight/styles/default.css">
