@@ -16,6 +16,12 @@
 </style>
 
 
+<h4>
+	<a href="${request.route_path('project.list')}">проекты</a> &rarr;
+	${project.title}
+</h4>
+
+
 %if tests:
 	<ul class="report-list">
 		%for report, data in tests:

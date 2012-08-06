@@ -1,26 +1,34 @@
 from pyramid.view import view_config
 import cPickle as pickle
-from pyramid.httpexceptions import HTTPNotFound, HTTPFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPFound, HTTPForbidden
 import sapyens.helpers
 from mistress_stat.db.models import Test
 from mistress_stat.db import DBSession
+import mistress_stat.db.models as models
+import pyramid.security
 
 
-@sapyens.helpers.add_route('report.list', '/report/list')
+@sapyens.helpers.add_route('report.list', '/project/{project_id:\d+}')
 @view_config(route_name='report.list', renderer='list.mako')
 def report_list (request):
+	project = models.Project.try_get(id = request.matchdict['project_id'])
+
+	if not pyramid.security.has_permission('admin', request.root, request) or False:
+		raise HTTPForbidden()
+
 	tests = []
-	for t in Test.query.order_by(Test.id.desc()):
+	for t in Test.query.filter_by(project_id = request.matchdict['project_id']).order_by(Test.id.desc()):
 		tests.append((t, pickle.loads(str(t.data))))
 
 	return {
-		'tests': tests
+		'project': project,
+		'tests': tests,
 	}
 
 @sapyens.helpers.add_route('root', '/')
 @view_config(route_name = 'root')
 def root_stub (request):
-	return HTTPFound(location = request.route_url('report.list'))
+	return HTTPFound(location = request.route_url('project.list'))
 
 @sapyens.helpers.add_route('test.delete', '/test/delete/{id:\d+}')
 @view_config(route_name='test.delete')
@@ -34,7 +42,7 @@ def test_delete (request):
 
 	return HTTPFound(location = request.route_path('report.list'))
 
-@sapyens.helpers.add_route('report.view', '/report/{test_id}')
+@sapyens.helpers.add_route('report.view', '/report/{test_id:\d+}')
 @view_config(route_name='report.view', renderer='test.mako')
 def report_view (request):
 	test_id = request.matchdict['test_id']
@@ -76,4 +84,13 @@ def report_script (request):
 
 	return {
 		'test': test,
+	}
+
+@sapyens.helpers.add_route('project.list', '/project')
+@view_config(route_name = 'project.list', renderer='project/list.mako')
+def projects (request):
+	projects = models.Project.query.all()
+
+	return {
+		'projects': projects,
 	}
