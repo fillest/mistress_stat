@@ -364,9 +364,18 @@ def group_finder (userid, request):
 		#TODO ?
 		return None
 
+class RootFactory (object):
+	__acl__ = [
+		(pyramid.security.Allow, 'group:admin', pyramid.security.ALL_PERMISSIONS),
+	]
+
+	def __init__ (self, request):
+		pass
+
 def make_wsgi_app (settings):
 	config = Configurator(
 		settings = settings,
+		root_factory = RootFactory,
 		session_factory = pyramid.session.UnencryptedCookieSessionFactoryConfig(
 			'secret_shit', cookie_name = 's', timeout = 60*60*24*3, cookie_max_age = 60*60*24*3,
 		),
@@ -375,6 +384,7 @@ def make_wsgi_app (settings):
 			callback = group_finder,
 			debug = False
 		),
+		authorization_policy = pyramid.authorization.ACLAuthorizationPolicy(),
 	)
 
 	config.add_tween('mistress_stat.stat_server.autocommit_tween_factory', under = pyramid.tweens.EXCVIEW)
