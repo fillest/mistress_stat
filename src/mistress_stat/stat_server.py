@@ -387,6 +387,11 @@ def make_wsgi_app (settings):
 		authorization_policy = pyramid.authorization.ACLAuthorizationPolicy(),
 	)
 
+	config.set_request_property(
+		lambda request: lambda permission: pyramid.security.has_permission(permission, request.root, request),
+		'has_permission'
+	)
+
 	config.add_tween('mistress_stat.stat_server.autocommit_tween_factory', under = pyramid.tweens.EXCVIEW)
 	config.add_tween('sapyens.db.notfound_tween_factory', under = pyramid.tweens.EXCVIEW)
 

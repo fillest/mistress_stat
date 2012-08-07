@@ -26,14 +26,16 @@
     </head>
     <body>
 		<div style="text-align: right;">
+			% if request.has_permission('admin'):
+				<a href="${request.route_path('admin/project.list')}">admin panel</a>
+				|
+			% endif
+
 			% if authenticated_userid (request):
 				${authenticated_userid(request)} - <a href="${request.route_path('logout')}">Log out</a>
 			% else:
 				<a href="${request.route_path('login')}">Log in</a>
 			% endif
-
-			|
-			<a href="${request.route_path('admin/project.list')}">projects</a>
 		</div>
 
         ${next.body()}
