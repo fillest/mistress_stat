@@ -337,15 +337,15 @@ def report_get_data (request):
 
 	return result
 
-
 def autocommit_tween_factory (handler, registry):
 	def tween (request):
 		try:
 			response = handler(request)
 			DBSession.commit()
 		except:
+			exc_info = sys.exc_info()  #workaround for DBSession.rollback() breaking traceback
 			DBSession.rollback()
-			raise
+			raise exc_info[0], exc_info[1], exc_info[2]
 		finally:
 			DBSession.remove()
 
