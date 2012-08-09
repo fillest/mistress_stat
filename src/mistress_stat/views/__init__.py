@@ -94,3 +94,8 @@ def projects (request):
 	return {
 		'projects': projects,
 	}
+
+@sapyens.helpers.add_route('admin.index', '/admin')
+@view_config(route_name = 'admin.index', renderer='admin/index.mako', permission='admin')
+def admin_index (request):
+	return {}

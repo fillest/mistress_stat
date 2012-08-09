@@ -9,3 +9,4 @@ def init (engine):
 
 def _on_before_reflect ():
 	import mistress_stat.db.models
+	Reflected.metadata.reflect()  #TODO for n-n tables

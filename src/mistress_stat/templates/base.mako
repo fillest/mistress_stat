@@ -27,7 +27,7 @@
     <body>
 		<div style="text-align: right;">
 			% if request.has_permission('admin'):
-				<a href="${request.route_path('admin/project.list')}">admin panel</a>
+				<a href="${request.route_path('admin.index')}">admin panel</a>
 				|
 			% endif
 
