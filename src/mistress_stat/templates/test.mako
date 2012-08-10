@@ -280,7 +280,7 @@
 		##<button onclick="window.stop = ! window.stop;">pause/resume</button>
 
 		<div class="nav">
-			<a href="${request.route_path('report.list')}"><img class="nav-icon" title="back to list" src="/static/img/glyphicons_small/glyphicons_114_list.png" style="width: 16px;" alt="back to report list"" /></a>
+			<a href="${request.route_path('report.list', project_id = report.project.id)}"><img class="nav-icon" title="back to list" src="/static/img/glyphicons_small/glyphicons_114_list.png" style="width: 16px;" alt="back to report list"" /></a>
 			##<a href="/report/${test_id}"><img class="nav-icon" title="link to this report" src="/static/img/glyphicons_small/glyphicons_050_link.png" style="width: 13px;" alt="#" /></a>
 			<a href="${request.route_path('test.script', id = test_id)}"><img class="nav-icon" title="test script" src="/static/img/glyphicons_small/glyphicons_351_book_open.png" style="width: 15px;" alt="test script" /></a>
 		</div>

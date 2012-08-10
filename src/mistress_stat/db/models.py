@@ -11,3 +11,4 @@ class User (Reflected, QueryPropertyMixin):
 
 class Project (Reflected, QueryPropertyMixin):
 	__tablename__ = 'projects'
+	tests = relationship('Test', backref = 'project')
