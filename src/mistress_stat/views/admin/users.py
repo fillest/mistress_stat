@@ -6,26 +6,11 @@ import wtforms.validators as v
 import wtforms.widgets as ww
 
 
-class Widget (unicode):
-	def all_projects (self):
-		return models.Project.query.all()
-
-class ProjectField (w.IntegerField):
-	widget = ww.HiddenInput()
-
-	#def process_data (self, obj):
-		#if obj:  #TODO think what to do with None on submit
-			#self.data = obj.id
-
-	def process_formdata (self, valuelist):
-		[id] = valuelist
-		self.data = models.Project.query.get(id)
-
 class Form (sapyens.crud.SecureForm):
 	name = w.TextField(u'Title', [v.Length(min = 1, max = 20), v.Required()])
 	password = w.TextField(u'Password', [v.Length(min = 1, max = 20), v.Required()])
 	group = w.TextField(u'Group', [v.Length(min = 1, max = 20), v.Required()])
-	projects = w.FieldList(ProjectField(), widget = Widget('/admin/users__projects.mako'))
+	projects = sapyens.crud.make_relation_field(models.Project, u'Projects')
 
 New, Edit, Create, Update, List, Delete = sapyens.crud.make_view_classes('admin/user', DBSession)
 
