@@ -33,16 +33,18 @@ def root_stub (request):
 	return HTTPFound(location = request.route_url('project.list'))
 
 @sapyens.helpers.add_route('test.delete', '/test/delete/{id:\d+}')
-@view_config(route_name='test.delete')
+@view_config(route_name='test.delete', permission = 'test.delete')
 def test_delete (request):
 	test_id = int(request.matchdict['id'])
+
+	project_id = DBSession.query(Test.project_id).filter(Test.id == test_id).scalar() or sapyens.helpers.raise_not_found()
 
 	Test.query.filter_by(id = test_id).delete()
 	DBSession.commit()
 
 	#TODO clear cache
 
-	return HTTPFound(location = request.route_path('report.list'))
+	return HTTPFound(location = request.route_path('report.list', project_id = project_id))
 
 @sapyens.helpers.add_route('report.view', '/report/{test_id:\d+}')
 @view_config(route_name='report.view', renderer='test.mako')

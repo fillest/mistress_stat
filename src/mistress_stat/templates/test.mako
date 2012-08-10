@@ -299,7 +299,9 @@
 
 		<div class="nav">
 			<span>Report #${test_id}</span>
-			##<a href="${request.route_path('test.delete', id = test_id)}">delete</a>
+			% if request.has_permission('test.delete'):
+				<a href="${request.route_path('test.delete', id = test_id)}">delete</a>
+			% endif
 			<table><tbody>
 				<tr><td>Test duration</td><td style="padding-left: 1em;"><span id="test_duration_value">...</span> (<span class="js-date" data-utc-time="${int(started * 1000)}">...</span> - <span class="js-date" data-utc-time="${int(finished * 1000) if finished else 0}">...</span>)</td></tr>
 				<tr><td>Requests total</td><td style="padding-left: 1em;"><span id="test_reqs_total_value">...</span></td></tr>
