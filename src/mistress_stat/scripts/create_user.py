@@ -1,6 +1,7 @@
 import mistress_stat.db
 import mistress_stat.db.models as models
 import sapyens.script
+import sqlalchemy
 
 
 class Script (sapyens.script.Script):
