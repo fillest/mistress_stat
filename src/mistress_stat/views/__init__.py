@@ -7,13 +7,15 @@ from mistress_stat.db import DBSession
 import mistress_stat.db.models as models
 import pyramid.security
 
+def current_user (request):
+	return models.User.query.filter_by(name = pyramid.security.authenticated_userid(request)).one()
 
 @sapyens.helpers.add_route('report.list', '/project/{project_id:\d+}')
-@view_config(route_name='report.list', renderer='list.mako')
+@view_config(route_name='report.list', renderer='list.mako', permission='project.view')
 def report_list (request):
 	project = models.Project.try_get(id = request.matchdict['project_id'])
 
-	if not pyramid.security.has_permission('admin', request.root, request) or False:
+	if ((not request.has_permission('admin')) and (not current_user(request).has_access_to(project))):
 		raise HTTPForbidden()
 
 	tests = []
