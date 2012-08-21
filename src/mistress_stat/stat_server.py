@@ -411,8 +411,7 @@ def run ():
 	parser.add_argument('--host', default = '0.0.0.0')
 	args = parser.parse_args()
 
-	os.environ['TZ'] = 'UTC'
-	time.tzset()
+	sapyens.helpers.set_utc_timezone()
 
 	pyramid.paster.setup_logging(args.config)
 
