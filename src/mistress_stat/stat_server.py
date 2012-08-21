@@ -62,6 +62,8 @@ workers_last_activity = {}
 @sapyens.helpers.add_route('test.register', '/new_test')
 @view_config(route_name='test.register', renderer='string')
 def test_register (request):
+	assert not request.registry.settings.get('debugtoolbar.enabled')
+
 	test = {
 		'started': float(request.GET['delayed_start_time']),
 		'finished': None,
