@@ -1,4 +1,23 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -e
 
-watchmedo auto-restart -R -p '*.py;*.ini' python -- src/mistress_stat/stat_server.py "$@"
+
+if [ "$#" -ne 1 ]
+then
+	echo "usage error: provide config as parameter"
+	exit 1
+fi
+
+
+sapyens_path="../sapyens"
+if [ -d "$sapyens_path" ]; then
+	extra_dirs=--directory\ "$sapyens_path"
+fi
+
+watchmedo auto-restart \
+	--recursive \
+	--patterns '*.py;*.ini' \
+	--directory . \
+	$extra_dirs \
+	--ignore-patterns venv \
+	python -- src/mistress_stat/stat_server.py "$@"
