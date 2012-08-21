@@ -39,7 +39,7 @@ import mistress_stat.db.models as models
 import psycopg2
 import pyramid.paster
 import pyramid.session
-from mistress_stat.lib import StepsQueue, stypes, dbdump, no_response
+from mistress_stat.lib import StepsQueue, stypes, dbdump, empty_response_app
 import pyramid.tweens
 import pyramid.events
 import pyramid.security
@@ -117,7 +117,7 @@ def test_add_stats (request):
 
 	step_ques[test_id].put(pack['data'], pack['step'], pack['node'])
 
-	return no_response
+	return empty_response_app
 
 def process_steps (test_id):
 	#print "tick", test_id

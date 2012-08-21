@@ -37,5 +37,5 @@ class StepsQueue (object):
 def dbdump (o):
 	return pickle.dumps(o, 2)
 
-def no_response (_environ, _start_response):
+def empty_response_app (_environ, _start_response):
 	return []
