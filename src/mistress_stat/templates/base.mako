@@ -7,7 +7,7 @@
 
 		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/1.6.2/moment.min.js"></script>
 
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+		<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js" charset="UTF-8"></script>
 		##<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 		##<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
 		##<script type="text/javascript" src="/js/flot/jquery.js"></script>
