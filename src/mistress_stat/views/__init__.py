@@ -7,16 +7,20 @@ from mistress_stat.db import DBSession
 import mistress_stat.db.models as models
 import pyramid.security
 
+
 def current_user (request):
 	return models.User.query.filter_by(name = pyramid.security.authenticated_userid(request)).one()
+
+def try_user_has_access_to_project (request, project):
+	if ((not request.has_permission('admin')) and (not current_user(request).has_access_to(project))):
+		raise HTTPForbidden()
 
 @sapyens.helpers.add_route('report.list', '/project/{project_id:\d+}')
 @view_config(route_name='report.list', renderer='list.mako', permission='project.view')
 def report_list (request):
 	project = models.Project.try_get(id = request.matchdict['project_id'])
 
-	if ((not request.has_permission('admin')) and (not current_user(request).has_access_to(project))):
-		raise HTTPForbidden()
+	try_user_has_access_to_project(request, project)
 
 	tests = []
 	for t in Test.query.filter_by(project_id = request.matchdict['project_id']).order_by(Test.id.desc()):
@@ -47,7 +51,7 @@ def test_delete (request):
 	return HTTPFound(location = request.route_path('report.list', project_id = project_id))
 
 @sapyens.helpers.add_route('report.view', '/report/{test_id:\d+}')
-@view_config(route_name='report.view', renderer='test.mako')
+@view_config(route_name='report.view', renderer='test.mako', permission='project.view')
 def report_view (request):
 	test_id = request.matchdict['test_id']
 	#if test_id == 'latest':
@@ -62,6 +66,8 @@ def report_view (request):
 		if not t:
 			return HTTPNotFound()
 
+		try_user_has_access_to_project(request, t.project)
+
 	data = pickle.loads(str(t.data))
 
 	return {
@@ -72,7 +78,7 @@ def report_view (request):
 	}
 
 @sapyens.helpers.add_route('test.save_comment', '/test/save_comment/{id:\d+}')
-@view_config(route_name='test.save_comment')
+@view_config(route_name='test.save_comment', permission='test.comment')
 def test_save_comment (request):
 	test_id = int(request.matchdict['id'])
 

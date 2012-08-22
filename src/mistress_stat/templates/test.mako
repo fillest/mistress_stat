@@ -289,10 +289,20 @@
 
 		<div>
 			<img title="Comment" src="/static/img/glyphicons_small/glyphicons_309_comments.png" alt="Comment" />
-			<form action="${request.route_path('test.save_comment', id = test_id)}" method="post" style="display: inline;">
-				<textarea name="comment" rows="2" cols="100" style="vertical-align: top; margin-left: 0.5em;">${report.comment}</textarea>
-				<input type="submit" value="update">
-			</form>
+
+			<textarea id="comment-content" rows="2" cols="100" style="vertical-align: top; margin-left: 0.5em;">${report.comment}</textarea>
+			<input type="button" value="update" id="btn-update-comment" />
+			<script type="text/coffeescript">
+				$ ->
+					$('#btn-update-comment').click ->
+						$.post(
+							"${request.route_path('test.save_comment', id = test_id)}",
+							{comment: $('#comment-content').val()},
+							-> window.location.reload(),
+							'html',
+						).error (jqXHR, textStatus, errorThrown) ->
+							alert jqXHR.responseText
+			</script>
 		</div>
 
 		<hr />
