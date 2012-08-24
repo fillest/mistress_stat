@@ -325,7 +325,7 @@ def report_get_data (request):
 		for status in test['resp_statuses']:
 			result['statuses'][status].append((js_t, statuses.get(status, 0)))
 		for error in test['errors']:
-			result['errors'][error].append((js_t, errors.get(error, 0)))
+			result['errors'][error].append((js_t, errors.get(error, errors.get(unicode(error[len("connect "):]), 0))))
 		result['req_sent'].append((js_t, req_sent))
 		result['concur_users_num_max'].append((js_t, concur_users_num_max))
 		result['concur_users_num_min'].append((js_t, concur_users_num_min))
