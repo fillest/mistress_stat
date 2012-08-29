@@ -212,7 +212,8 @@
 								var d = [];
 								var d1 = [];
 								$.each(data.statuses, function(status, values) {
-									if (status.slice(0, '200'.length) == '200') {
+									var st = status.slice(0, '200'.length);
+									if (st == '200' || st == '201' || st == '202') { //TODO move to test
 										d.push({label: "resp/s http" + status, data: localize_time(values)});
 									} else {
 										d1.push({label: "resp/s http" + status, data: localize_time(values)});

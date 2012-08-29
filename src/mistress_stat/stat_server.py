@@ -160,7 +160,7 @@ def process_steps (test_id):
 					if data_type == stypes.RESPONSE_STATUS:
 						grp, status = rec['value']
 
-						if int(status) not in (200,):  #TODO move to test?
+						if int(status) not in (200, 201, 202):  #TODO move to test logic
 							test['resp_bad_statuses_total'] += 1
 						else:
 							test['resp_successful_total'] += 1
