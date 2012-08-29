@@ -1,7 +1,7 @@
 <%inherit file="/base.mako" />
 
 
-<%block name="title">Report list: ${project.title}</%block>
+<%block name="title">${project.title} ← reports</%block>
 
 
 <style>

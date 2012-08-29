@@ -3,7 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-		<title><%block name="title">Untitled</%block> — Mistress</title>
+		<title><%block name="title">Untitled page</%block> ← Mistress</title>
 
 		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/1.6.2/moment.min.js"></script>
 
