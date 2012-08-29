@@ -226,9 +226,15 @@
 								__plots.rps.setData(d);
 								__plots.rps.setupGrid();
 								__plots.rps.draw();
-								__plots.errors.setData(d1);
-								__plots.errors.setupGrid();
-								__plots.errors.draw();
+								
+								if (d1.length) {
+									$('#plot_errors').closest('tr').show();
+									__plots.errors.setData(d1);
+									__plots.errors.setupGrid();
+									__plots.errors.draw();
+								} else {
+									$('#plot_errors').closest('tr').hide();
+								}
 
 
 								var d = [
