@@ -347,6 +347,11 @@
 					<td></td>
 				</tr>
 				<tr>
+					<td>Concurrency<div class="legend" id="legend_concur"></div></td>
+					<td><div class="js-plot" id="plot_concur" style="height: 150px"></div></td>
+					<td></td>
+				</tr>
+				<tr>
 					<td>Connection latency<div class="legend" id="legend_conn"></div></td>
 					<td><div class="js-plot" id="plot_conn" style="height: 200px"></div></td>
 					<td></td>
@@ -364,11 +369,6 @@
 				<tr>
 					<td>Errors<div class="legend" id="legend_errors"></div></td>
 					<td><div class="js-plot" id="plot_errors" style="height: 300px"></div></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td>Concurrency<div class="legend" id="legend_concur"></div></td>
-					<td><div class="js-plot" id="plot_concur" style="height: 150px"></div></td>
 					<td></td>
 				</tr>
 				<%doc>
