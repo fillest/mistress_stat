@@ -14,7 +14,7 @@ class Form (sapyens.crud.SecureForm):
 
 New, Edit, Create, Update, List, Delete = sapyens.crud.make_view_classes('admin/user', DBSession)
 
-List.edit_title = lambda _, obj: obj.name
+List.edit_title = lambda _, obj: u"%s (%s)" % (obj.name, obj.group)
 
 @sapyens.helpers.include_to_config()
 class UserCrud (sapyens.crud.Crud):
