@@ -13,14 +13,14 @@ def logout (request):
 	resp.headerlist.extend(pyramid.security.forget(request))
 	return resp
 
-
-@forbidden_view_config(renderer = 'string')
+@forbidden_view_config(renderer = 'string', xhr = True)
 def acess_denied (request):
 	request.response.status = 403
 	return 'error: not authorized'
 
 @add_route('login', '/login')
 @view_config(route_name = 'login', renderer = '/login.mako')
+@forbidden_view_config(renderer = '/login.mako')
 def login (request):
 	#referrer = request.url
 	#if referrer == request.route_url('login'):
