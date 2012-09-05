@@ -6,6 +6,7 @@ from mistress_stat.db.models import Test
 from mistress_stat.db import DBSession
 import mistress_stat.db.models as models
 import pyramid.security
+import sqlalchemy.orm
 
 
 def current_user (request):
@@ -23,7 +24,10 @@ def report_list (request):
 	try_user_has_access_to_project(request, project)
 
 	tests = []
-	for t in Test.query.filter_by(project_id = request.matchdict['project_id']).order_by(Test.id.desc()):
+	for t in (Test.query
+			.options(sqlalchemy.orm.defer('script'))
+			.filter_by(project_id = request.matchdict['project_id'])
+			.order_by(Test.id.desc())):
 		tests.append((t, pickle.loads(str(t.data))))
 
 	return {
