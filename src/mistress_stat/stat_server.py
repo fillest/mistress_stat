@@ -370,6 +370,7 @@ class RootFactory (object):
 	__acl__ = [
 		(pyramid.security.Allow, 'group:admin', pyramid.security.ALL_PERMISSIONS),
 		(pyramid.security.Allow, 'group:manager', ('project.view', 'test.comment')),
+		(pyramid.security.Allow, 'group:guest', ('project.view',)),
 	]
 
 	def __init__ (self, request):
