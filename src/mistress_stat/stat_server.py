@@ -113,7 +113,7 @@ def test_add_stats (request):
 	test_id = int(request.matchdict['test_id'])
 	if test_id not in tests_cache:
 		log.error("add_stats: test_id not in tests_cache: %s" % test_id)  #TODO ?
-		return no_response
+		return empty_response_app
 
 	pack = json.loads(zlib.decompress(request.body))
 
