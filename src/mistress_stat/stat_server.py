@@ -44,6 +44,7 @@ import pyramid.tweens
 import pyramid.events
 import pyramid.security
 import pyramid.authentication
+import sapyens.views
 
 
 log = logging.getLogger(__name__)
@@ -376,6 +377,14 @@ class RootFactory (object):
 	def __init__ (self, request):
 		pass
 
+class LoginView (sapyens.views.LoginView):
+	def _check_password (self, username, password, request):
+		user = models.User.query.filter_by(name = username).first()
+		if user:
+			return password == user.password
+		else:
+			return False
+
 def make_wsgi_app (settings):
 	config = Configurator(
 		settings = settings,
@@ -402,6 +411,13 @@ def make_wsgi_app (settings):
 	config.add_subscriber(_add_renderer_globals, pyramid.events.BeforeRender)
 
 	config.add_static_view('static', 'static', cache_max_age=3600)
+
+	config.add_route('login', '/login')
+	login_view = LoginView(lambda _, request: request.registry.settings['password'])
+	config.add_view(login_view, route_name = 'login', renderer = 'sapyens.views:templates/login.mako')
+	config.add_forbidden_view(login_view, renderer = 'sapyens.views:templates/login.mako')
+	config.add_route('logout', '/logout')
+	config.add_view(sapyens.views.LogoutView('root'), route_name = 'logout')
 
 	config.scan(package = 'mistress_stat')
 
