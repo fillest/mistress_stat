@@ -13,7 +13,6 @@ from webob import Request
 import time
 import sys
 import itertools
-import re
 import simplejson as json  #remember: numeric keys are being converted to strings
 import random
 import collections
@@ -82,8 +81,8 @@ def test_register (request):
 		'errors': set(),
 		'groups': set(),
 
-		'rx_snapshot': util.get_rx(),
-		'tx_snapshot': util.get_tx(),
+		# 'rx_snapshot': util.get_rx(),
+		# 'tx_snapshot': util.get_tx(),
 
 		#'state': 'created',
 	}
@@ -197,6 +196,7 @@ def process_steps (test_id):
 						buf_request_sent += rec['value']
 					elif data_type == stypes.CONNECT_ERROR:
 						tests_cache[test_id]['errors'].add("connect " + rec['value'])
+						# tests_cache[test_id]['errors'].add(rec['value'])
 						buf_errors[rec['value']] += 1
 					elif data_type == stypes.RESPONSE_ERROR:
 						if "timeout" in rec['value']:
@@ -454,7 +454,7 @@ def run ():
 	port = args.port
 	log.info("Serving on %s:%s..." % (host, port))
 	try:
-		WSGIServer((host, port), make_wsgi_app(settings), handler_class=util.LogDisabled, spawn=Pool(100), environ={
+		WSGIServer((host, port), make_wsgi_app(settings), handler_class=util.LogDisabled, spawn=Pool(40), environ={
 			'tests_cache': tests_cache,
 		}).serve_forever()
 	except KeyboardInterrupt:
