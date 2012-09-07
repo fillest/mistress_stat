@@ -14,7 +14,7 @@ import time
 import sys
 import itertools
 import re
-import json #remember: numeric keys are being converted to strings
+import simplejson as json  #remember: numeric keys are being converted to strings
 import random
 import collections
 from collections import defaultdict
