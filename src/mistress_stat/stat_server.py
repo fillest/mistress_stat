@@ -88,6 +88,9 @@ def test_register (request):
 		#'state': 'created',
 	}
 
+	if request.registry.has_listeners:
+		request.registry.notify(OnRegisterTest(test))
+
 	t = Test(data = dbdump(test), script = request.body, project_id = request.GET['project_id'])
 	DBSession.add(t)
 	DBSession.commit()
@@ -105,8 +108,9 @@ def test_register (request):
 	log.info("registered test #%s" % id)
 	return id
 
-
-
+class OnRegisterTest (object):
+	def __init__ (self, test_cache):
+		self.test_cache = test_cache
 
 @sapyens.helpers.add_route('test.add_stats', '/add_stats/{test_id}')
 @view_config(route_name='test.add_stats', renderer=null_renderer)
@@ -338,7 +342,16 @@ def report_get_data (request):
 
 		t += 1
 
+	if request.registry.has_listeners:
+		request.registry.notify(OnGetReportData(result, test, t))
+
 	return result
+
+class OnGetReportData (object):
+	def __init__ (self, result, test_cache, last_timestamp):
+		self.result = result
+		self.test_cache = test_cache
+		self.last_timestamp = last_timestamp
 
 def autocommit_tween_factory (handler, registry):
 	def tween (request):
@@ -441,7 +454,9 @@ def run ():
 	port = args.port
 	log.info("Serving on %s:%s..." % (host, port))
 	try:
-		WSGIServer((host, port), make_wsgi_app(settings), handler_class=util.LogDisabled, spawn=Pool(100), environ={}).serve_forever()
+		WSGIServer((host, port), make_wsgi_app(settings), handler_class=util.LogDisabled, spawn=Pool(100), environ={
+			'tests_cache': tests_cache,
+		}).serve_forever()
 	except KeyboardInterrupt:
 		log.info("interrupted")
 
