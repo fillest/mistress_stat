@@ -7,6 +7,7 @@ from mistress_stat.db import DBSession
 import mistress_stat.db.models as models
 import pyramid.security
 import sqlalchemy.orm
+import calendar
 
 
 def current_user (request):
@@ -16,6 +17,7 @@ def try_user_has_access_to_project (request, project):
 	if ((not request.has_permission('admin')) and (not current_user(request).has_access_to(project))):
 		raise HTTPForbidden()
 
+
 @sapyens.helpers.add_route('report.list', '/project/{project_id:\d+}')
 @view_config(route_name='report.list', renderer='list.mako', permission='project.view')
 def report_list (request):
@@ -23,16 +25,17 @@ def report_list (request):
 
 	try_user_has_access_to_project(request, project)
 
-	tests = []
-	for t in (Test.query
-			.options(sqlalchemy.orm.defer('script'))
-			.filter_by(project_id = request.matchdict['project_id'])
-			.order_by(Test.id.desc())):
-		tests.append((t, pickle.loads(str(t.data))))
+	tests = (Test.query
+		.options(sqlalchemy.orm.defer('script'))
+		.options(sqlalchemy.orm.defer('data'))
+		.filter_by(project_id = request.matchdict['project_id'])
+		.order_by(Test.id.desc())
+		.all())
 
 	return {
 		'project': project,
 		'tests': tests,
+		'to_ts': lambda dt: calendar.timegm(dt.utctimetuple()),
 	}
 
 @sapyens.helpers.add_route('root', '/')
@@ -76,7 +79,7 @@ def report_view (request):
 
 	return {
 		'test_id': test_id,
-		'started': data['started'],
+		'started': calendar.timegm(t.start_time.utctimetuple()),
 		'finished': data.get('finished'),
 		'report': t,
 	}

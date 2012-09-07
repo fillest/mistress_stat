@@ -24,10 +24,10 @@
 
 %if tests:
 	<ul class="report-list">
-		%for report, data in tests:
+		%for report in tests:
 			<li>
 				<table><tbody><tr>
-					<td style="vertical-align: top;"><a href="${request.route_path('report.view', test_id=report.id)}">#${report.id}&nbsp;&nbsp;&nbsp;<span class="js-date" data-utc-time="${int(data['started'] * 1000)}">...</span></a></td>
+					<td style="vertical-align: top;"><a href="${request.route_path('report.view', test_id=report.id)}">#${report.id}&nbsp;&nbsp;&nbsp;<span class="js-date" data-utc-time="${int(to_ts(report.start_time) * 1000)}">...</span></a></td>
 					<td><pre style="margin: 0 0 0 1em;">${report.comment}</pre></td>
 				</tr></tbody></table>
 			</li>

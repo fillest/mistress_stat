@@ -44,6 +44,8 @@ import pyramid.events
 import pyramid.security
 import pyramid.authentication
 import sapyens.views
+import datetime
+import calendar
 
 
 log = logging.getLogger(__name__)
@@ -65,7 +67,6 @@ def test_register (request):
 	assert not request.registry.settings.get('debugtoolbar.enabled')
 
 	test = {
-		'started': float(request.GET['delayed_start_time']),
 		'finished': None,
 
 		'worker_num': int(request.GET['worker_num']),
@@ -90,11 +91,15 @@ def test_register (request):
 	if request.registry.has_listeners:
 		request.registry.notify(OnRegisterTest(test))
 
-	t = Test(data = dbdump(test), script = request.body, project_id = request.GET['project_id'])
-	DBSession.add(t)
-	DBSession.commit()
-	id = t.id
+	t = Test(
+		data = dbdump(test),
+		script = request.body,
+		project_id = request.GET['project_id'],
+		start_time = datetime.datetime.utcfromtimestamp(float(request.GET['delayed_start_time'])),
+		finish_time = None,
+	).add().commit()
 
+	id = t.id
 	tests_cache[id] = test
 
 	step_ques[id] = StepsQueue(test['worker_num'])
@@ -286,19 +291,20 @@ def process_steps (test_id):
 @view_config(route_name='report.get_data', renderer='json')
 def report_get_data (request):
 	test_id = int(request.matchdict['test_id'])
+	t = Test.query.get(test_id)
+	if not t:
+		return HTTPNotFound()
+
 	if test_id in tests_cache:
 		test = tests_cache[test_id]
 	else:
-		t = Test.query.filter_by(id = test_id).first()
-		if not t:
-			return HTTPNotFound()
 		test = pickle.loads(str(t.data))
 
-	t = test['started']
+	t = calendar.timegm(t.start_time.utctimetuple())
 	r = test['result']
 	result = defaultdict(list)
 
-	result['started'] = test['started']
+	result['started'] = t
 	result['finished'] = test['finished']
 
 	result['reqs_total'] = test['reqs_total']
