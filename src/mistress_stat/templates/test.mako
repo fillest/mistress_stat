@@ -227,6 +227,11 @@
 									}
 								});
 								$.each(data.errors, function(status, values) {
+									if (/111$/.test(status)) {
+										status = status + ("<br/>(ECONNREFUSED)")
+									} else if (/110$/.test(status)) {
+										status = status + ("<br/>(ETIMEDOUT)")
+									}
 									d1.push({label: "error " + status + ' <span style="color: #aaa;">(right axis)</span>', data: localize_time(values), yaxis: 2});
 								});
 								d.push({label: "req/sec", data: localize_time(data.req_sent)});
