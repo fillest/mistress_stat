@@ -187,9 +187,14 @@
 								$.each(data.resp_time_meav, function (grp, values) {
 									(grp == 'static' ? d1 : d).push({label: "resp_time med abs dev <strong>" + grp + '</strong>', data: localize_time(values)});
 								});
-								__plots.resp.setData(d);
-								__plots.resp.setupGrid();
-								__plots.resp.draw();
+								console.log(data.resp_successful_total);
+								if (data.resp_successful_total) {
+									__plots.resp.setData(d);
+									__plots.resp.setupGrid();
+									__plots.resp.draw();
+								} else {
+									$('#plot_resp').closest('tr').hide();
+								}
 								__plots.resp1.setData(d1);
 								__plots.resp1.setupGrid();
 								__plots.resp1.draw();
