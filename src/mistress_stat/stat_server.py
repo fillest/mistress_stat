@@ -77,6 +77,8 @@ def test_register (request):
 		'resp_timeouts_total': 0,
 		'resp_bad_statuses_total': 0,
 		'resp_successful_total': 0,
+		'conns_total': 0,
+		'conns_errors_total': 0,
 
 		'resp_statuses': set(),
 		'errors': set(),
@@ -182,6 +184,8 @@ def process_steps (test_id):
 						buf_resp_time[grp_name].append(resp_time)
 						tests_cache[test_id]['groups'].add(grp_name)
 					elif data_type == stypes.CONNECT_TIME:
+						test['conns_total'] += 1
+
 						grp_name, timelen = rec['value']
 						buf_conn_time[grp_name].append(timelen)
 						tests_cache[test_id]['groups'].add(grp_name)
@@ -200,6 +204,8 @@ def process_steps (test_id):
 
 						buf_request_sent += rec['value']
 					elif data_type == stypes.CONNECT_ERROR:
+						test['conns_errors_total'] += 1
+
 						tests_cache[test_id]['errors'].add("connect " + rec['value'])
 						# tests_cache[test_id]['errors'].add(rec['value'])
 						buf_errors[rec['value']] += 1
@@ -312,6 +318,8 @@ def report_get_data (request):
 	result['resp_timeouts_total'] = test['resp_timeouts_total']
 	result['resp_bad_statuses_total'] = test['resp_bad_statuses_total']
 	result['resp_successful_total'] = test['resp_successful_total']
+	result['conns_total'] = test.get('conns_total', 'unknown')
+	result['conns_errors_total'] = test.get('conns_errors_total', 'unknown')
 
 	result['statuses'] = defaultdict(list)
 	result['errors'] = defaultdict(list)

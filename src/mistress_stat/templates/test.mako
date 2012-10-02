@@ -164,10 +164,12 @@
 
 
 								$('#test_reqs_total_value').html(data.reqs_total);
-								$('#test_resp_errors_total_value').html(data.resp_errors_total + ' (' + (data.resp_errors_total / data.reqs_total * 100).toFixed(1) + '%)');
-								$('#test_resp_timeouts_total_value').html(data.resp_timeouts_total + ' (' + (data.resp_timeouts_total / data.reqs_total * 100).toFixed(1) + '%)');
-								$('#test_resp_bad_statuses_total_value').html(data.resp_bad_statuses_total + ' (' + (data.resp_bad_statuses_total / data.reqs_total * 100).toFixed(1) + '%)');
-								$('#test_resp_successful_total_value').html(data.resp_successful_total + ' (' + (data.resp_successful_total / data.reqs_total * 100).toFixed(1) + '%)');
+								$('#test_conns_total_value').html(data.conns_total);
+								$('#test_conns_errors_total_value').html(data.conns_errors_total + ' (' + (((data.conns_errors_total / data.conns_total) || 0) * 100).toFixed(2) + '%)');
+								$('#test_resp_errors_total_value').html(data.resp_errors_total + ' (' + (((data.resp_errors_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
+								$('#test_resp_timeouts_total_value').html(data.resp_timeouts_total + ' (' + (((data.resp_timeouts_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
+								$('#test_resp_bad_statuses_total_value').html(data.resp_bad_statuses_total + ' (' + (((data.resp_bad_statuses_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
+								$('#test_resp_successful_total_value').html(data.resp_successful_total + ' (' + (((data.resp_successful_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
 
 
 								//plot.getData()[1].color = "rgba(175,216,248, 0.1)"
@@ -326,6 +328,8 @@
 				<tr><td>Response bad statuses total</td><td style="padding-left: 1em;"><span id="test_resp_bad_statuses_total_value">...</span></td></tr>
 				<tr><td>Response timeouts total</td><td style="padding-left: 1em;"><span id="test_resp_timeouts_total_value">...</span></td></tr>
 				<tr><td>Response errors total</td><td style="padding-left: 1em;"><span id="test_resp_errors_total_value">...</span></td></tr>
+				<tr><td>Connections total</td><td style="padding-left: 1em;"><span id="test_conns_total_value">...</span></td></tr>
+				<tr><td>Connections errors total</td><td style="padding-left: 1em;"><span id="test_conns_errors_total_value">...</span></td></tr>
 			</tbody></table>
 		</div>
 
