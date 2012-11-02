@@ -53,8 +53,9 @@ log = logging.getLogger(__name__)
 
 WORKERS_TIMEOUT = 60  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
 
-
-tests_cache = {}
+# print 'mistress_stat.stat_server' in sys.modules.keys()
+# if 'mistress_stat.stat_server' not in sys.modules.keys():
+# tests_cache = {}
 timers = {}
 step_ques = {}
 finish_que = defaultdict(dict)
@@ -102,13 +103,14 @@ def test_register (request):
 	).add().commit()
 
 	id = t.id
+	tests_cache = request.environ['tests_cache']
 	tests_cache[id] = test
 
 	step_ques[id] = StepsQueue(test['worker_num'])
 
 	workers_last_activity[id] = dict((i, time.time()) for i in range(1, test['worker_num'] + 1)) #TODO send actual ids
 
-	timers[id] = util.start_periodic(1, process_steps, [id])
+	timers[id] = util.start_periodic(1, process_steps, [id, tests_cache])
 	timers[id].link_exception()
 
 	log.info("registered test #%s" % id)
@@ -121,6 +123,7 @@ class OnRegisterTest (object):
 @sapyens.helpers.add_route('test.add_stats', '/add_stats/{test_id}')
 @view_config(route_name='test.add_stats', renderer=null_renderer)
 def test_add_stats (request):
+	tests_cache = request.environ['tests_cache']
 	test_id = int(request.matchdict['test_id'])
 	if test_id not in tests_cache:
 		log.error("add_stats: test_id not in tests_cache: %s" % test_id)  #TODO ?
@@ -132,7 +135,7 @@ def test_add_stats (request):
 
 	return empty_response_app
 
-def process_steps (test_id):
+def process_steps (test_id, tests_cache):
 	#print "tick", test_id
 	#TODO what if this gets interrupted by kill during io?
 	#TODO dont forget actual finish time
@@ -297,16 +300,17 @@ def process_steps (test_id):
 @view_config(route_name='report.get_data', renderer='json')
 def report_get_data (request):
 	test_id = int(request.matchdict['test_id'])
-	t = Test.query.get(test_id)
-	if not t:
+	tm = Test.query.get(test_id)
+	if not tm:
 		return HTTPNotFound()
 
+	tests_cache = request.environ['tests_cache']
 	if test_id in tests_cache:
 		test = tests_cache[test_id]
 	else:
-		test = pickle.loads(str(t.data))
+		test = pickle.loads(str(tm.data))
 
-	t = calendar.timegm(t.start_time.utctimetuple())
+	t = calendar.timegm(tm.start_time.utctimetuple())
 	r = test['result']
 	result = defaultdict(list)
 
@@ -357,15 +361,16 @@ def report_get_data (request):
 		t += 1
 
 	if request.registry.has_listeners:
-		request.registry.notify(OnGetReportData(result, test, t))
+		request.registry.notify(OnGetReportData(result, test, t, tm))
 
 	return result
 
 class OnGetReportData (object):
-	def __init__ (self, result, test_cache, last_timestamp):
+	def __init__ (self, result, test_cache, last_timestamp, test):
 		self.result = result
 		self.test_cache = test_cache
 		self.last_timestamp = last_timestamp
+		self.test = test
 
 def autocommit_tween_factory (handler, registry):
 	def tween (request):
@@ -468,8 +473,8 @@ def run ():
 	port = args.port
 	log.info("Serving on %s:%s..." % (host, port))
 	try:
-		WSGIServer((host, port), make_wsgi_app(settings), handler_class=util.LogDisabled, spawn=Pool(40), environ={
-			'tests_cache': tests_cache,
+		WSGIServer((host, port), make_wsgi_app(settings), handler_class=util.LogDisabled, spawn=Pool(40), environ = {
+			'tests_cache': {},
 		}).serve_forever()
 	except KeyboardInterrupt:
 		log.info("interrupted")
