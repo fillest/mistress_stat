@@ -192,6 +192,7 @@
 									__plots.resp.setData(d);
 									__plots.resp.setupGrid();
 									__plots.resp.draw();
+									$('#plot_resp').closest('tr').show();
 								} else {
 									$('#plot_resp').closest('tr').hide();
 								}
@@ -231,6 +232,8 @@
 										status = status + ("<br/>(ECONNREFUSED)")
 									} else if (/110$/.test(status)) {
 										status = status + ("<br/>(ETIMEDOUT)")
+									} else if (/104$/.test(status)) {
+										status = status + ("<br/>(ECONNRESET)")
 									}
 									d1.push({label: "error " + status + ' <span style="color: #aaa;">(right axis)</span>', data: localize_time(values), yaxis: 2});
 								});
