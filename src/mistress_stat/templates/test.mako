@@ -187,7 +187,7 @@
 								$.each(data.resp_time_meav, function (grp, values) {
 									(grp == 'static' ? d1 : d).push({label: "resp_time med abs dev <strong>" + grp + '</strong>', data: localize_time(values)});
 								});
-								console.log(data.resp_successful_total);
+								// console.log(data.resp_successful_total);
 								if (data.resp_successful_total) {
 									__plots.resp.setData(d);
 									__plots.resp.setupGrid();
