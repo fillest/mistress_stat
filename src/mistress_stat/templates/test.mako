@@ -154,6 +154,7 @@
 								if (data.finished) {
 									window.stop = true;
 								}
+								$('#loading-spinner').hide();
 
 								var diff = (data.finished - data.started) * 1000;
 								var vhourDiff = Math.floor(diff/1000/60/60);  // in hours
@@ -358,6 +359,11 @@
 			</tbody></table>
 
 			<div id="compacted-warning" style="display: none; color: #B03D1A;"><hr/>Warning: plots are compacted to speed up plotting.</div>
+
+			<div id="loading-spinner" style="text-align: center;">
+				<hr/>
+				<img id="spinner" src="http://cdn.fillest.ru/spinner.gif" alt="loading..." title="loading..." />
+			</div>
 		</div>
 
 		<hr />
