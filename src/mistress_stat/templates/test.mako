@@ -128,8 +128,10 @@
 
 
 				window.stop = false;
+				window.sending = false;
 				function load_plots_data () {
-					if (! window.stop) {
+					if (! window.stop && !window.sending) {
+						window.sending = true;
 						$.ajax({
 							url: "/get_data/" + test_id,
 							method: 'GET',
@@ -139,6 +141,7 @@
 								window.console && console.log(jqXHR);
 							},
 							success: function onDataReceived(data) {
+								window.sending = false;
 								if (data.finished) {
 									window.stop = true;
 								}
@@ -299,7 +302,7 @@
 		</style>
 
 
-		##<button onclick="window.stop = ! window.stop;">pause/resume</button>
+		##<button onclick="window.stop = ! window.stop;">pause/resume data updating</button>
 
 		<div class="nav">
 			<a href="${request.route_path('report.list', project_id = report.project.id)}"><img class="nav-icon" title="back to list" src="/static/img/glyphicons_small/glyphicons_114_list.png" style="width: 16px;" alt="back to report list" /></a>
