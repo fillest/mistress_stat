@@ -19,9 +19,18 @@
 					return - new Date().getTimezoneOffset() * 60 * 1000;
 				}
 				function localize_time (data) {
-					return $.map(data, function (v) {
-						return [[v[0] + get_tz_offset(), v[1]]];
+					var tz_offset = get_tz_offset()
+					var r = $.map(data, function (v) {
+						return [[v[0] + tz_offset, v[1]]];
 					});
+					// console.log(r.length)
+					if (r.length > 10000) {
+						$('#compacted-warning').show();
+						r = $.grep(r, function(item, i) {
+							return i % Math.floor(r.length / 4000) == 0
+						})
+					}
+					return r;
 				}
 
 
@@ -347,6 +356,8 @@
 				<tr><td>Connections total</td><td style="padding-left: 1em;"><span id="test_conns_total_value">...</span></td></tr>
 				<tr><td>Connections errors total</td><td style="padding-left: 1em;"><span id="test_conns_errors_total_value">...</span></td></tr>
 			</tbody></table>
+
+			<div id="compacted-warning" style="display: none; color: #B03D1A;"><hr/>Warning: plots are compacted to speed up plotting.</div>
 		</div>
 
 		<hr />
