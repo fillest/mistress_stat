@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
 set -e
+# set -x
 
 
-if [ "$#" -ne 1 ]
-then
+if [ "$#" -ne 1 ]; then
 	echo "usage error: provide config as parameter"
 	exit 1
 fi
 
 
-sapyens_path="../sapyens"
-if [ -d "$sapyens_path" ]; then
-	extra_dirs=--directory\ "$sapyens_path"
+if [ -f watch_extra_dirs.sh ]; then
+	source watch_extra_dirs.sh
 fi
 
 watchmedo auto-restart \
 	--recursive \
 	--patterns '*.py;*.ini' \
 	--directory . \
-	$extra_dirs \
+	$watch_extra_dirs \
 	--ignore-patterns venv \
 	python -- src/mistress_stat/stat_server.py "$@"

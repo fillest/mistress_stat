@@ -3,3 +3,4 @@ venv/*
 *.pyc
 *.egg-info
 *.ini
+watch_extra_dirs.sh

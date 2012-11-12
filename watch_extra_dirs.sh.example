@@ -1,0 +1,7 @@
+dir_paths=(
+	../sapyens
+)
+
+for path in ${dir_paths[@]}; do
+	watch_extra_dirs+=\ --directory\ "${path}"
+done
