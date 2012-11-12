@@ -469,6 +469,8 @@ def run ():
 	settings = pyramid.paster.get_appsettings(args.config)
 	db.init(engine_from_config(settings, 'sqlalchemy.'))
 
+	settings['extension_templates'] = {}
+
 	host = args.host
 	port = args.port
 	log.info("Serving on %s:%s..." % (host, port))

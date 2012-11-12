@@ -1,5 +1,15 @@
 <%inherit file="/base.mako" />
 
+
+<%def name="include_extensions_templates(name)">
+	% for _ext_name, templates in request.registry.settings['extension_templates'].items():
+		% if name in templates:
+			<%include file="${templates[name]}"/>
+		% endif
+	% endfor
+</%def>
+
+
 <%block name="title">Report #${test_id}</%block>
 
 
@@ -134,6 +144,8 @@
 				/*__plots.network = $.plot($("#plot_network"), [], make_opts('#legend_network'));
 				$("#plot_network").bind("plothover", make_hover_handler(__plots.network));
 */
+
+				${include_extensions_templates('init_plots_js')}
 
 
 				window.stop = false;
@@ -285,6 +297,8 @@
 								__plots.network.setupGrid();
 								__plots.network.draw();
 								*/
+
+								${include_extensions_templates('update_plots_js')}
 							}
 						});
 					}
@@ -398,6 +412,9 @@
 					<td><div class="js-plot" id="plot_conn1" style="height: 200px"></div></td>
 					<td></td>
 				</tr>
+
+				${include_extensions_templates('plots_html')}
+				
 				<tr>
 					<td>Throughput<div class="legend" id="legend_rps"></div></td>
 					<td><div class="js-plot" id="plot_rps" style="height: 300px"></div></td>
