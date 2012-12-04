@@ -166,139 +166,145 @@
 								if (data.finished) {
 									window.stop = true;
 								}
-								$('#loading-spinner').hide();
-
-								var diff = (data.finished - data.started) * 1000;
-								var vhourDiff = Math.floor(diff/1000/60/60);  // in hours
-								diff -= vhourDiff*1000*60*60;
-								var vmindiff = Math.floor(diff/1000/60); // in minutes
-								diff -= vmindiff*1000*60;
-								var vsecdiff= Math.floor(diff/1000);  // in seconds
-								//Text formatting
-								var hourtext = '00';
-								if (vhourDiff > 0){ hourtext = String(vhourDiff);}
-								if (hourtext.length == 1){hourtext = '0' + hourtext};
-								var mintext = '00';
-								if (vmindiff > 0){ mintext = String(vmindiff);}
-								if (mintext.length == 1){mintext = '0' + mintext};
-								var sectext = '00';
-								if (vsecdiff > 0){ sectext = String(vsecdiff);}
-								if (sectext.length == 1){sectext = '0' + sectext};
-
-								$('#test_duration_value').html(hourtext + ":" + mintext + ':' + sectext);
-
-
-								$('#test_reqs_total_value').html(data.reqs_total);
-								$('#test_conns_total_value').html(data.conns_total);
-								$('#test_conns_errors_total_value').html(data.conns_errors_total + ' (' + (((data.conns_errors_total / data.conns_total) || 0) * 100).toFixed(2) + '%)');
-								$('#test_resp_errors_total_value').html(data.resp_errors_total + ' (' + (((data.resp_errors_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
-								$('#test_resp_timeouts_total_value').html(data.resp_timeouts_total + ' (' + (((data.resp_timeouts_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
-								$('#test_resp_bad_statuses_total_value').html(data.resp_bad_statuses_total + ' (' + (((data.resp_bad_statuses_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
-								$('#test_resp_successful_total_value').html(data.resp_successful_total + ' (' + (((data.resp_successful_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
-
-
-								//plot.getData()[1].color = "rgba(175,216,248, 0.1)"
-								//plot.draw()
-								//http://groups.google.com/group/flot-graphs/browse_thread/thread/cbe64499abf9a5a1?pli=1
-
-
-								//=================================================
-
-								var d = [];
-								var d1 = [];
-								$.each(data.resp_time, function (grp, values) {
-									(grp == 'static' ? d1 : d).push({label: "resp_time <strong>" + grp + '</strong>', data: localize_time(values)});
-								});
-								$.each(data.resp_time_meav, function (grp, values) {
-									(grp == 'static' ? d1 : d).push({label: "resp_time med abs dev <strong>" + grp + '</strong>', data: localize_time(values)});
-								});
-								// console.log(data.resp_successful_total);
-								if (data.resp_successful_total) {
-									__plots.resp.setData(d);
-									__plots.resp.setupGrid();
-									__plots.resp.draw();
-									$('#plot_resp').closest('tr').show();
-								} else {
-									$('#plot_resp').closest('tr').hide();
-								}
-								__plots.resp1.setData(d1);
-								__plots.resp1.setupGrid();
-								__plots.resp1.draw();
-
-
-								var d = [];
-								var d1 = [];
-								$.map(data.conn_time, function(values, grp) {
-									(grp == 'static' ? d1 : d).push({label: "conn_time <strong>" + grp + '</strong>', data: localize_time(values)});
-								});
-								$.map(data.conn_time_meav, function(values, grp) {
-									(grp == 'static' ? d1 : d).push({label: "conn_time med abs dev <strong>" + grp + '</strong>', data: localize_time(values)});
-								});
-								__plots.conn.setData(d);
-								__plots.conn.setupGrid();
-								__plots.conn.draw();
-								__plots.conn1.setData(d1);
-								__plots.conn1.setupGrid();
-								__plots.conn1.draw();
-
-
-								var d = [];
-								var d1 = [];
-								$.each(data.statuses, function(status, values) {
-									var st = status.slice(0, '200'.length);
-									if (st == '200' || st == '201' || st == '202') { //TODO move to test
-										d.push({label: "resp/s http" + status, data: localize_time(values)});
-									} else {
-										d1.push({label: "resp/s http" + status, data: localize_time(values)});
-									}
-								});
-								$.each(data.errors, function(status, values) {
-									if (/111$/.test(status)) {
-										status = status + ("<br/>(ECONNREFUSED)")
-									} else if (/110$/.test(status)) {
-										status = status + ("<br/>(ETIMEDOUT)")
-									} else if (/104$/.test(status)) {
-										status = status + ("<br/>(ECONNRESET)")
-									}
-									d1.push({label: "error " + status + ' <span style="color: #aaa;">(right axis)</span>', data: localize_time(values), yaxis: 2});
-								});
-								d.push({label: "req/sec", data: localize_time(data.req_sent)});
-								__plots.rps.setData(d);
-								__plots.rps.setupGrid();
-								__plots.rps.draw();
 								
-								if (d1.length) {
-									$('#plot_errors').closest('tr').show();
-									__plots.errors.setData(d1);
-									__plots.errors.setupGrid();
-									__plots.errors.draw();
-								} else {
-									$('#plot_errors').closest('tr').hide();
-								}
+								$('#spinner-label').html("drawing");
+
+								// setTimeout is for actual rendering spinner new label text, otherwise it hangs
+								setTimeout(function () {
+									var diff = (data.finished - data.started) * 1000;
+									var vhourDiff = Math.floor(diff/1000/60/60);  // in hours
+									diff -= vhourDiff*1000*60*60;
+									var vmindiff = Math.floor(diff/1000/60); // in minutes
+									diff -= vmindiff*1000*60;
+									var vsecdiff= Math.floor(diff/1000);  // in seconds
+									//Text formatting
+									var hourtext = '00';
+									if (vhourDiff > 0){ hourtext = String(vhourDiff);}
+									if (hourtext.length == 1){hourtext = '0' + hourtext};
+									var mintext = '00';
+									if (vmindiff > 0){ mintext = String(vmindiff);}
+									if (mintext.length == 1){mintext = '0' + mintext};
+									var sectext = '00';
+									if (vsecdiff > 0){ sectext = String(vsecdiff);}
+									if (sectext.length == 1){sectext = '0' + sectext};
+
+									$('#test_duration_value').html(hourtext + ":" + mintext + ':' + sectext);
 
 
-								var d = [
-									{label: 'concur_users_max <span style="color: #aaa;">(left axis)</span>', data: localize_time(data.concur_users_num_max)},
-									{label: 'concur_users_min <span style="color: #aaa;">(left axis)</span>', data: localize_time(data.concur_users_num_min)},
-									{label: 'concur_conns_min <span style="color: #aaa;">(left axis)</span>', data: localize_time(data.concur_conns_num_min)},
-									{label: 'concur_conns_max <span style="color: #aaa;">(left axis)</span>', data: localize_time(data.concur_conns_num_max)},
-									{label: 'sessions_started <span style="color: #aaa;">(right axis)</span>', data: localize_time(data.start_session), yaxis: 2}
-								];
-								__plots.concur.setData(d);
-								__plots.concur.setupGrid();
-								__plots.concur.draw();
+									$('#test_reqs_total_value').html(data.reqs_total);
+									$('#test_conns_total_value').html(data.conns_total);
+									$('#test_conns_errors_total_value').html(data.conns_errors_total + ' (' + (((data.conns_errors_total / data.conns_total) || 0) * 100).toFixed(2) + '%)');
+									$('#test_resp_errors_total_value').html(data.resp_errors_total + ' (' + (((data.resp_errors_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
+									$('#test_resp_timeouts_total_value').html(data.resp_timeouts_total + ' (' + (((data.resp_timeouts_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
+									$('#test_resp_bad_statuses_total_value').html(data.resp_bad_statuses_total + ' (' + (((data.resp_bad_statuses_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
+									$('#test_resp_successful_total_value').html(data.resp_successful_total + ' (' + (((data.resp_successful_total / data.reqs_total) || 0) * 100).toFixed(1) + '%)');
 
-								//=================================================network
-								/*
-								var d = [];
-								d.push({label: "KBytes received", data: localize_time(data.network_received)});
-								d.push({label: "KBytes sent", data: localize_time(data.network_sent)});
-								__plots.network.setData(d);
-								__plots.network.setupGrid();
-								__plots.network.draw();
-								*/
 
-								${include_extensions_templates('update_plots_js')}
+									//plot.getData()[1].color = "rgba(175,216,248, 0.1)"
+									//plot.draw()
+									//http://groups.google.com/group/flot-graphs/browse_thread/thread/cbe64499abf9a5a1?pli=1
+
+
+									//=================================================
+
+									var d = [];
+									var d1 = [];
+									$.each(data.resp_time, function (grp, values) {
+										(grp == 'static' ? d1 : d).push({label: "resp_time <strong>" + grp + '</strong>', data: localize_time(values)});
+									});
+									$.each(data.resp_time_meav, function (grp, values) {
+										(grp == 'static' ? d1 : d).push({label: "resp_time med abs dev <strong>" + grp + '</strong>', data: localize_time(values)});
+									});
+									// console.log(data.resp_successful_total);
+									if (data.resp_successful_total) {
+										__plots.resp.setData(d);
+										__plots.resp.setupGrid();
+										__plots.resp.draw();
+										$('#plot_resp').closest('tr').show();
+									} else {
+										$('#plot_resp').closest('tr').hide();
+									}
+									__plots.resp1.setData(d1);
+									__plots.resp1.setupGrid();
+									__plots.resp1.draw();
+
+
+									var d = [];
+									var d1 = [];
+									$.map(data.conn_time, function(values, grp) {
+										(grp == 'static' ? d1 : d).push({label: "conn_time <strong>" + grp + '</strong>', data: localize_time(values)});
+									});
+									$.map(data.conn_time_meav, function(values, grp) {
+										(grp == 'static' ? d1 : d).push({label: "conn_time med abs dev <strong>" + grp + '</strong>', data: localize_time(values)});
+									});
+									__plots.conn.setData(d);
+									__plots.conn.setupGrid();
+									__plots.conn.draw();
+									__plots.conn1.setData(d1);
+									__plots.conn1.setupGrid();
+									__plots.conn1.draw();
+
+
+									var d = [];
+									var d1 = [];
+									$.each(data.statuses, function(status, values) {
+										var st = status.slice(0, '200'.length);
+										if (st == '200' || st == '201' || st == '202') { //TODO move to test
+											d.push({label: "resp/s http" + status, data: localize_time(values)});
+										} else {
+											d1.push({label: "resp/s http" + status, data: localize_time(values)});
+										}
+									});
+									$.each(data.errors, function(status, values) {
+										if (/111$/.test(status)) {
+											status = status + ("<br/>(ECONNREFUSED)")
+										} else if (/110$/.test(status)) {
+											status = status + ("<br/>(ETIMEDOUT)")
+										} else if (/104$/.test(status)) {
+											status = status + ("<br/>(ECONNRESET)")
+										}
+										d1.push({label: "error " + status + ' <span style="color: #aaa;">(right axis)</span>', data: localize_time(values), yaxis: 2});
+									});
+									d.push({label: "req/sec", data: localize_time(data.req_sent)});
+									__plots.rps.setData(d);
+									__plots.rps.setupGrid();
+									__plots.rps.draw();
+									
+									if (d1.length) {
+										$('#plot_errors').closest('tr').show();
+										__plots.errors.setData(d1);
+										__plots.errors.setupGrid();
+										__plots.errors.draw();
+									} else {
+										$('#plot_errors').closest('tr').hide();
+									}
+
+
+									var d = [
+										{label: 'concur_users_max <span style="color: #aaa;">(left axis)</span>', data: localize_time(data.concur_users_num_max)},
+										{label: 'concur_users_min <span style="color: #aaa;">(left axis)</span>', data: localize_time(data.concur_users_num_min)},
+										{label: 'concur_conns_min <span style="color: #aaa;">(left axis)</span>', data: localize_time(data.concur_conns_num_min)},
+										{label: 'concur_conns_max <span style="color: #aaa;">(left axis)</span>', data: localize_time(data.concur_conns_num_max)},
+										{label: 'sessions_started <span style="color: #aaa;">(right axis)</span>', data: localize_time(data.start_session), yaxis: 2}
+									];
+									__plots.concur.setData(d);
+									__plots.concur.setupGrid();
+									__plots.concur.draw();
+
+									//=================================================network
+									/*
+									var d = [];
+									d.push({label: "KBytes received", data: localize_time(data.network_received)});
+									d.push({label: "KBytes sent", data: localize_time(data.network_sent)});
+									__plots.network.setData(d);
+									__plots.network.setupGrid();
+									__plots.network.draw();
+									*/
+
+									${include_extensions_templates('update_plots_js')}
+
+									$('#loading-spinner').hide();
+								}, 1);
 							}
 						});
 					}
@@ -376,7 +382,8 @@
 
 			<div id="loading-spinner" style="text-align: center;">
 				<hr/>
-				<img id="spinner" src="http://cdn.fillest.ru/spinner.gif" alt="loading..." title="loading..." />
+				<img src="http://cdn.fillest.ru/spinner.gif" alt="loadin" title="loading" />
+				<span id="spinner-label">downloading data</span>
 			</div>
 		</div>
 
