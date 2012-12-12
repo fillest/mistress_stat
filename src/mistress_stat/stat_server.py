@@ -33,7 +33,7 @@ import sapyens.db
 from sqlalchemy import engine_from_config
 import db
 from db import DBSession
-from mistress_stat.db.models import Test
+from mistress_stat.db.models import Test, Project
 import mistress_stat.db.models as models
 import psycopg2
 import pyramid.paster
@@ -97,7 +97,7 @@ def test_register (request):
 	t = Test(
 		data = dbdump(test),
 		script = request.body,
-		project_id = request.GET['project_id'],
+		project_id = Project.query.filter_by(slug = request.GET['project_id']).one().id,
 		start_time = datetime.datetime.utcfromtimestamp(float(request.GET['delayed_start_time'])),
 		finish_time = None,
 	).add().commit()

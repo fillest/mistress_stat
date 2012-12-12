@@ -7,6 +7,7 @@ import wtforms.validators as v
 
 class Form (sapyens.crud.SecureForm):
 	title = w.TextField(u'Title', [v.Length(min = 1, max = 20), v.Required()])
+	slug = w.TextField(u'Slug', [v.Length(min = 1, max = 20), v.Required()])
 
 
 New, Edit, Create, Update, List, Delete = sapyens.crud.make_view_classes('admin/project', DBSession)
