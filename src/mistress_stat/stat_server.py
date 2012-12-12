@@ -277,7 +277,9 @@ def process_steps (test_id, tests_cache):
 	if is_finished:
 		tests_cache[test_id]['finished'] = (now - WORKERS_TIMEOUT) if is_crashed else now
 		#DBSession.query(Test).filter_by(id = test_id).update({Test.data: dbdump(tests_cache[test_id])})
-		t = DBSession.query(Test).filter_by(id = test_id).one()
+		t = Test.query.filter_by(id = test_id).first()
+		if not t:
+			raise Exception("no test with id = %s (maybe it was deleted before finish timeout happened?)" % test_id)
 		t.data = dbdump(tests_cache[test_id])
 		DBSession.add(t)
 		DBSession.commit()
