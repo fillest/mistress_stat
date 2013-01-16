@@ -444,7 +444,7 @@ def make_wsgi_app (settings):
 
 	config.add_subscriber(_add_renderer_globals, pyramid.events.BeforeRender)
 
-	config.add_static_view('static', 'static', cache_max_age=3600)
+	config.add_static_view('static', 'mistress_stat:static', cache_max_age=3600)
 
 	config.add_route('login', '/login')
 	login_view = LoginView(lambda _, request: request.registry.settings['password'])

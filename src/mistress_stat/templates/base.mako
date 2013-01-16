@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
 		<title><%block name="title">Untitled page</%block> ← Mistress</title>
 
-		<script src="http://cdn.fillest.ru/jquery-1.8.1.min.js" type="text/javascript" charset="UTF-8"></script>
-		<script src="http://cdn.fillest.ru/moment.1.7.0.min.js" type="text/javascript" charset="UTF-8"></script>
-		<script src="http://cdn.fillest.ru/coffee-script.1.3.3.min.js" type="text/javascript" charset="UTF-8"></script>
+		<script src="${request.static_url('mistress_stat:static/js/jquery-1.8.1.min.js')}" type="text/javascript" charset="UTF-8"></script>
+		<script src="${request.static_url('mistress_stat:static/js/moment.1.7.0.min.js')}" type="text/javascript" charset="UTF-8"></script>
+		<script src="${request.static_url('mistress_stat:static/js/coffee-script.1.3.3.min.js')}" type="text/javascript" charset="UTF-8"></script>
 		##<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 		##<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
 		##<script type="text/javascript" src="/js/flot/jquery.js"></script>
@@ -23,8 +23,8 @@
 				});
 			});
 		</script>
-    </head>
-    <body>
+	</head>
+	<body>
 		<div style="text-align: right;">
 			% if request.has_permission('admin'):
 				<a href="${request.route_path('admin.index')}">admin panel</a>
@@ -38,6 +38,6 @@
 			% endif
 		</div>
 
-        ${next.body()}
-    </body>
+		${next.body()}
+	</body>
 </html>

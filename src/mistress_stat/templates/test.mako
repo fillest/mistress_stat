@@ -13,12 +13,12 @@
 <%block name="title">Report #${test_id}</%block>
 
 
-		<script type="text/javascript" src="/static/js/flot/jquery.flot.js"></script>
-		<script type="text/javascript" src="/static/js/flot/jquery.flot.crosshair.js"></script>
+		<script src="${request.static_url('mistress_stat:static/js/flot/jquery.flot.js')}" type="text/javascript" charset="UTF-8"></script>
+		<script src="${request.static_url('mistress_stat:static/js/flot/jquery.flot.crosshair.js')}" type="text/javascript" charset="UTF-8"></script>
 		##<script type="text/javascript" src="/js/flot/jquery.flot.navigate.js"></script>
 		##<script type="text/javascript" src="/js/flot/jquery.flot.navigate.patched.js"></script>
 
-        <script type="text/javascript">
+		<script type="text/javascript">
 			$(function () {
 				'use strict';
 

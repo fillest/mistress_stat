@@ -4,8 +4,8 @@
 <%block name="title">Report #${test.id} script</%block>
 
 
-<link rel="stylesheet" href="/static/highlight/styles/default.css">
-<script src="/static/highlight/highlight.pack.js"></script>
+<link rel="stylesheet" href="${request.static_url('mistress_stat:static/highlight/styles/default.css')}">
+<script src="${request.static_url('mistress_stat:static/highlight/highlight.pack.js')}"></script>
 
 
 <script>
