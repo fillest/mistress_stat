@@ -15,6 +15,22 @@
 	}
 </style>
 
+<script type="text/coffeescript">
+	$ ->
+		check_new_test = () ->
+			$.post(
+				"${request.route_path('report.list.check_new', project_id = project.id, last_test_id = tests[0].id if tests else 0)}",
+				{},
+				(resp) ->
+					if resp.has_new
+						window.location.reload()
+				'json',
+			).error (jqXHR, textStatus, errorThrown) ->
+				clearInterval window._check_new_test_timer
+				alert "Error: " + jqXHR.responseText
+		window._check_new_test_timer = setInterval check_new_test, 2000
+</script>
+
 
 <h4>
 	<a href="${request.route_path('project.list')}">проекты</a> &rarr;

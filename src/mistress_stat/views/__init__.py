@@ -38,6 +38,22 @@ def report_list (request):
 		'to_ts': lambda dt: calendar.timegm(dt.utctimetuple()),
 	}
 
+@sapyens.helpers.add_route('report.list.check_new', '/project/{project_id:\d+}/{last_test_id:\d+}')
+@view_config(route_name='report.list.check_new', renderer='json', permission='project.view')
+def report_list_check_new (request):
+	project = models.Project.try_get(id = request.matchdict['project_id'])
+
+	try_user_has_access_to_project(request, project)
+
+	test_num = (Test.query
+		.filter_by(project_id = request.matchdict['project_id'])
+		.filter(Test.id > int(request.matchdict['last_test_id']))
+		.count())
+
+	return {
+		'has_new': test_num > 0,
+	}
+
 @sapyens.helpers.add_route('root', '/')
 @view_config(route_name = 'root')
 def root_stub (request):
