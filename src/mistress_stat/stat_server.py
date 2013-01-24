@@ -91,9 +91,6 @@ def test_register (request):
 		#'state': 'created',
 	}
 
-	if request.registry.has_listeners:
-		request.registry.notify(OnRegisterTest(test))
-
 	t = Test(
 		data = dbdump(test),
 		script = request.body,
@@ -101,6 +98,9 @@ def test_register (request):
 		start_time = datetime.datetime.utcfromtimestamp(float(request.GET['delayed_start_time'])),
 		finish_time = None,
 	).add().commit()
+
+	if request.registry.has_listeners:
+		request.registry.notify(OnRegisterTest(test, t, request.registry.settings))
 
 	id = t.id
 	tests_cache = request.environ['tests_cache']
@@ -110,15 +110,17 @@ def test_register (request):
 
 	workers_last_activity[id] = dict((i, time.time()) for i in range(1, test['worker_num'] + 1)) #TODO send actual ids
 
-	timers[id] = util.start_periodic(1, process_steps, [id, tests_cache])
+	timers[id] = util.start_periodic(1, process_steps, [id, tests_cache, request.registry.settings, request.registry])
 	timers[id].link_exception()
 
 	log.info("registered test #%s" % id)
 	return id
 
 class OnRegisterTest (object):
-	def __init__ (self, test_cache):
+	def __init__ (self, test_cache, test, settings):
 		self.test_cache = test_cache
+		self.test = test
+		self.settings = settings
 
 @sapyens.helpers.add_route('test.add_stats', '/add_stats/{test_id}')
 @view_config(route_name='test.add_stats', renderer=null_renderer)
@@ -135,7 +137,7 @@ def test_add_stats (request):
 
 	return empty_response_app
 
-def process_steps (test_id, tests_cache):
+def process_steps (test_id, tests_cache, settings, registry):
 	#print "tick", test_id
 	#TODO what if this gets interrupted by kill during io?
 	#TODO dont forget actual finish time
@@ -284,6 +286,9 @@ def process_steps (test_id, tests_cache):
 		DBSession.add(t)
 		DBSession.commit()
 
+		if registry.has_listeners:
+			registry.notify(OnFinishTest(t, settings))
+
 		del tests_cache[test_id]
 
 		del finish_que[test_id]
@@ -296,6 +301,11 @@ def process_steps (test_id, tests_cache):
 		del timers[test_id]
 
 		log.info("finished test #%s%s" % (test_id, " (timeout)" if is_crashed else ""))
+
+class OnFinishTest (object):
+	def __init__ (self, test, settings):
+		self.test = test
+		self.settings = settings
 
 
 @sapyens.helpers.add_route('report.get_data', '/get_data/{test_id}')
