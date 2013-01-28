@@ -53,14 +53,6 @@ log = logging.getLogger(__name__)
 
 WORKERS_TIMEOUT = 60  #TODO if e.g. 3, "add_stats: test_id not in tests_cache" is somehow raised
 
-# print 'mistress_stat.stat_server' in sys.modules.keys()
-# if 'mistress_stat.stat_server' not in sys.modules.keys():
-# tests_cache = {}
-timers = {}
-step_ques = {}
-finish_que = defaultdict(dict)
-workers_last_activity = {}
-
 
 @sapyens.helpers.add_route('test.register', '/new_test')
 @view_config(route_name='test.register', renderer='string')
@@ -106,12 +98,13 @@ def test_register (request):
 	tests_cache = request.environ['tests_cache']
 	tests_cache[id] = test
 
-	step_ques[id] = StepsQueue(test['worker_num'])
+	request.environ['step_ques'][id] = StepsQueue(test['worker_num'])
 
-	workers_last_activity[id] = dict((i, time.time()) for i in range(1, test['worker_num'] + 1)) #TODO send actual ids
+	request.environ['workers_last_activity'][id] = dict((i, time.time()) for i in range(1, test['worker_num'] + 1)) #TODO send actual ids
 
-	timers[id] = util.start_periodic(1, process_steps, [id, tests_cache, request.registry.settings, request.registry])
-	timers[id].link_exception()
+	params = [id, tests_cache, request.registry, request.environ['step_ques'], request.environ['finish_que'], request.environ['workers_last_activity'], request.environ['timers']]
+	request.environ['timers'][id] = util.start_periodic(1, process_steps, params)
+	request.environ['timers'][id].link_exception()
 
 	log.info("registered test #%s" % id)
 	return id
@@ -133,11 +126,11 @@ def test_add_stats (request):
 
 	pack = json.loads(zlib.decompress(request.body))
 
-	step_ques[test_id].put(pack['data'], pack['step'], pack['node'])
+	request.environ['step_ques'][test_id].put(pack['data'], pack['step'], pack['node'])
 
 	return empty_response_app
 
-def process_steps (test_id, tests_cache, settings, registry):
+def process_steps (test_id, tests_cache, registry, step_ques, finish_que, workers_last_activity, timers):
 	#print "tick", test_id
 	#TODO what if this gets interrupted by kill during io?
 	#TODO dont forget actual finish time
@@ -287,7 +280,7 @@ def process_steps (test_id, tests_cache, settings, registry):
 		DBSession.commit()
 
 		if registry.has_listeners:
-			registry.notify(OnFinishTest(t, settings))
+			registry.notify(OnFinishTest(t, registry.settings))
 
 		del tests_cache[test_id]
 
@@ -489,6 +482,10 @@ def run ():
 	try:
 		WSGIServer((host, port), make_wsgi_app(settings), handler_class=util.LogDisabled, spawn=Pool(40), environ = {
 			'tests_cache': {},
+			'timers': {},
+			'step_ques': {},
+			'finish_que': defaultdict(dict),
+			'workers_last_activity': {},
 		}).serve_forever()
 	except KeyboardInterrupt:
 		log.info("interrupted")
