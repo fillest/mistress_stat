@@ -77,6 +77,8 @@ def test_register (request):
 		'errors': set(),
 		'groups': set(),
 
+		'write_connect_error_log': request.GET.get('write_connect_error_log') == '1',
+
 		# 'rx_snapshot': util.get_rx(),
 		# 'tx_snapshot': util.get_tx(),
 
@@ -144,6 +146,8 @@ def process_steps (test_id, tests_cache, registry, step_ques, finish_que, worker
 	#tx = new_tx - test['tx_snapshot']
 	#test['tx_snapshot'] = new_tx
 
+	connect_errors = []
+
 	while True:
 		steps = step_ques[test_id].next()
 		if steps:
@@ -204,9 +208,15 @@ def process_steps (test_id, tests_cache, registry, step_ques, finish_que, worker
 					elif data_type == stypes.CONNECT_ERROR:
 						test['conns_errors_total'] += 1
 
-						tests_cache[test_id]['errors'].add("connect " + rec['value'])
-						# tests_cache[test_id]['errors'].add(rec['value'])
-						buf_errors[rec['value']] += 1
+						try:
+							tests_cache[test_id]['errors'].add("connect " + rec['value']['msg'])
+						except:
+							print "rec:", rec
+							raise
+						buf_errors[rec['value']['msg']] += 1
+
+						if "not enough ports" not in rec['value']['msg']:
+							connect_errors.append(u'%s\t%s\t%s' % (rec['value']['time'], rec['value']['ip'], rec['value']['msg']))
 					elif data_type == stypes.RESPONSE_ERROR:
 						if "timeout" in rec['value']:
 							test['resp_timeouts_total'] += 1
@@ -256,6 +266,10 @@ def process_steps (test_id, tests_cache, registry, step_ques, finish_que, worker
 				#res['network_sent'].append(float(tx) / 1024.0)
 		else:
 			break
+
+	if connect_errors and test['write_connect_error_log']:
+		with open("conn_err_%s.log" % test_id, 'ab') as f:
+			f.write("\n".join(connect_errors).encode('utf-8') + "\n")
 
 	is_crashed = False
 	now = time.time()
