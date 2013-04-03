@@ -17,7 +17,8 @@ psycopg2==2.4.5
 pyramid==1.4a4
 pyramid-debugtoolbar==1.0.3
 repoze.lru==0.6
-git+git://github.com/fillest/sapyens.git
+#git+git://github.com/fillest/sapyens.git
+sapyens==0.1.6
 simplejson==2.6.2
 translationstring==1.1
 venusian==1.0a7
