@@ -1,8 +1,8 @@
 #coding: utf-8
 import gevent.monkey
 gevent.monkey.patch_all()
-import psycogreen.gevent.psyco_gevent
-psycogreen.gevent.psyco_gevent.make_psycopg_green()
+import psycogreen.gevent
+psycogreen.gevent.patch_psycopg()
 import argparse
 import logging
 import logging.config
