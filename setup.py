@@ -22,7 +22,7 @@ setuptools.setup(
 		[paste.app_factory]
 			main = mistress_stat:main
 		[console_scripts]
-			migrate = mistress_stat.scripts.migrate:main
+			migrate = sapyens.migrate:run
 			create_user = mistress_stat.scripts.create_user:main
 	""",
 )

@@ -18,6 +18,8 @@ mako.directories = mistress_stat:templates
 mako.module_directory = /tmp/projects/mistress_stat/compiled_templates
 mako.strict_undefined = true
 
+sapyens.migrate.dir_path = src/mistress_stat/db/migrations
+
 
 [loggers]
 keys = root, mistress_stat, sqlalchemy, __main__
