@@ -3,7 +3,7 @@ This distribution is **statistics server** component of Mistress.
 
 ## Setup
     sudo apt-get install libpq-dev python-dev libevent-dev libevent-2.0-5
-    sudo apt-get isntall mercurial #for psycogreen from hg repo
+    sudo apt-get install mercurial #for psycogreen from hg repo
     cd mistress-stat
     virtualenv --no-site-packages venv
     source venv/bin/activate
