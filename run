@@ -3,7 +3,7 @@ set -e
 # set -x
 
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -lt 1 ]; then
 	echo "usage error: provide config as parameter"
 	exit 1
 fi
