@@ -1,9 +1,9 @@
 [program:mistress_stat]
-command=/opt/mistress-stat/venv/bin/python src/mistress_stat/stat_server.py config.ini
-directory=/opt/mistress-stat/
+command=/opt/mistress_stat/venv/bin/python src/mistress_stat/stat_server.py config.ini
+directory=/opt/mistress_stat/
 user=root
-stdout_logfile=/opt/mistress-stat/log_stdout
-stderr_logfile=/opt/mistress-stat/log_stderr
+stdout_logfile=/opt/mistress_stat/log_stdout
+stderr_logfile=/opt/mistress_stat/log_stderr
 autostart=true
 autorestart=true
 startsecs=3
