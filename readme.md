@@ -3,7 +3,6 @@ This distribution is **statistics server** component of Mistress.
 
 ## Setup
     sudo apt-get install libpq-dev python-dev libevent-dev libevent-2.0-5
-    sudo apt-get install mercurial #for psycogreen from hg repo
     git clone https://github.com/fillest/mistress_stat
     cd mistress_stat
     virtualenv --no-site-packages venv
@@ -11,11 +10,12 @@ This distribution is **statistics server** component of Mistress.
     pip install -r req.txt
     pip install -e .
     sudo -u postgres createdb --echo --encoding=UTF8 --owner=postgres mistress
-    migrate development.ini
-    create_user development.ini admin yourpassword admin
     
     cp development.ini.example development.ini
     #edit development.ini
+    
+    migrate development.ini
+    create_user development.ini admin yourpassword admin
 
 ## Usage
     cd mistress_stat
